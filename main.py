@@ -55,7 +55,7 @@ def median_filtr():
 def minus():
     image1=Image.open("exp.jpg")
     draw1=ImageDraw.Draw(image1)
-    image2=Image.open("res46.jpg")
+    image2=Image.open("res51.jpg")
     draw2=ImageDraw.ImageDraw(image2)
     width=image1.size[0]
     height=image1.size[1]
@@ -97,12 +97,50 @@ def laplassian():
             draw.point((i,j),(pix[i,j][0]+d[0][j][i],pix[i,j][1]+d[1][j][i],pix[i,j][2]+d[2][j][i]))
     image.save("res31.jpg", "JPEG")
     del draw
-
+def gauss(x,y,sigma):
+    twoPi = math.pi * 2
+    return (1/(twoPi*sigma*sigma)*math.exp(-(x*x+y*y)/float(2*sigma*sigma)))
+def gauss_filter(sigma):
+    n=3
+    f=[[gauss(i,j,sigma) for j in range (-(n-1)//2, (n+1)//2)] for i in range(-(n-1)//2, (n+1)//2)]
+    image=Image.open("olen.jpg")
+    draw=ImageDraw.Draw(image)
+    width=image.size[0]
+    height=image.size[1]
+    pix=image.load()
+    for i in range(n/2,width-n/2):
+        for j in range(n/2,height-n/2):
+            r=[0,0,0]
+            for k in range(3):
+                for p in range(-(n-1)//2, (n+1)//2):
+                    for q in range (-(n-1)//2, (n+1)//2):
+                        r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
+            draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
+    image.save("res49.jpg")
+def increase_in_clearness():
+    f=[[-1,-1,-1],[-1,9,-1],[-1,-1,-1]]
+    n=3
+    image=Image.open("exp.jpg")
+    draw=ImageDraw.Draw(image)
+    width=image.size[0]
+    height=image.size[1]
+    pix=image.load()
+    for i in range(n/2,width-n/2,n):
+        for j in range(n/2,height-n/2,n):
+            r=[0,0,0]
+            for k in range(3):
+                for p in range(-(n-1)//2, (n+1)//2):
+                    for q in range (-(n-1)//2, (n+1)//2):
+                        r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
+            draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
+    image.save("res51.jpg")
 def main():
     #laplassian()
     #median_filtr()
-    #minus()
-    step_filter(1.2)
+    minus()
+    #step_filter(1.2)
+    #gauss_filter(1);
+    #increase_in_clearness()
 
 if __name__ == "__main__":
     main()
