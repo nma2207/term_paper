@@ -28,7 +28,7 @@ def step_filter(gamma):
             b = int(((pix[i,j][1] / 255.) ** gamma)*255)
             c = int(((pix[i,j][2] / 255.) ** gamma)*255)
             draw.point((i,j),(a,b,c))
-    image.save("res48.jpg", "JPEG")
+    image.save("step_filter/res1.jpg", "JPEG")
     del draw
 
 def median_filtr():
@@ -38,8 +38,8 @@ def median_filtr():
     height=image.size[1]
     pix=image.load()
     n=2
-    for i in range(0,width-n):
-        for j in range(0,height-n):
+    for i in range(0,width-n,n):
+        for j in range(0,height-n,n):
             f = []
             for p in range(n):
                 for q in range(n):
@@ -49,13 +49,13 @@ def median_filtr():
             for p in range(n):
                 for q in range(n):
                     draw.point((i+p,j+q),(f[(n*n+1)/2][0],f[(n*n+1)/2][1],f[(n*n+1)/2][2]))
-    image.save("res47.jpg", "JPEG")
+    image.save("median_filter/res1.jpg", "JPEG")
     del draw
 
 def minus():
-    image1=Image.open("exp.jpg")
+    image1=Image.open("olen.jpg")
     draw1=ImageDraw.Draw(image1)
-    image2=Image.open("res51.jpg")
+    image2=Image.open("res52.jpg")
     draw2=ImageDraw.ImageDraw(image2)
     width=image1.size[0]
     height=image1.size[1]
@@ -69,7 +69,7 @@ def minus():
     del draw2
 
 def laplassian():
-    image=Image.open("LLlPF3XNF4k.jpg")
+    image=Image.open("olen.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -95,11 +95,13 @@ def laplassian():
             #       for q in range(-(n-1)/2, (n-1)/2+1):
             #           r[k]+=(f[p+n/2][q+n/2]*pix[i+p,j+q][k])
             draw.point((i,j),(pix[i,j][0]+d[0][j][i],pix[i,j][1]+d[1][j][i],pix[i,j][2]+d[2][j][i]))
-    image.save("res31.jpg", "JPEG")
+    image.save("laplassian/res1.jpg", "JPEG")
     del draw
+
 def gauss(x,y,sigma):
     twoPi = math.pi * 2
     return (1/(twoPi*sigma*sigma)*math.exp(-(x*x+y*y)/float(2*sigma*sigma)))
+
 def gauss_filter(sigma):
     n=3
     f=[[gauss(i,j,sigma) for j in range (-(n-1)//2, (n+1)//2)] for i in range(-(n-1)//2, (n+1)//2)]
@@ -116,11 +118,12 @@ def gauss_filter(sigma):
                     for q in range (-(n-1)//2, (n+1)//2):
                         r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
             draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
-    image.save("res49.jpg")
+    image.save("gauss_filter/res1.jpg")
+
 def increase_in_clearness():
     f=[[-1,-1,-1],[-1,9,-1],[-1,-1,-1]]
     n=3
-    image=Image.open("exp.jpg")
+    image=Image.open("olen.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -133,14 +136,73 @@ def increase_in_clearness():
                     for q in range (-(n-1)//2, (n+1)//2):
                         r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
             draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
-    image.save("res51.jpg")
+    image.save("increase_in_clearness/res1.jpg")
+
+def box_filter():
+    f=[[1./9,1./9,1./9],[1./9,1./9,1./9],[1./9,1./9,1./9]]
+    n=3
+    image=Image.open("olen.jpg")
+    draw=ImageDraw.Draw(image)
+    width=image.size[0]
+    height=image.size[1]
+    pix=image.load()
+    for i in range(n/2,width-n/2,n):
+        for j in range(n/2,height-n/2,n):
+            r=[0,0,0]
+            for k in range(3):
+                for p in range(-(n-1)//2, (n+1)//2):
+                    for q in range (-(n-1)//2, (n+1)//2):
+                        r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
+                        #print r
+            draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
+    image.save("box_filter/res1.jpg")
+
+def add_alfa(alfa):
+    image=Image.open("olen.jpg")
+    draw=ImageDraw.Draw(image)
+    width=image.size[0]
+    height=image.size[1]
+    pix=image.load()
+    for i in range(0,width):
+        for j in range(height):
+            a=pix[i,j][0]*alfa
+            b=pix[i,j][1]*alfa
+            c=pix[i,j][2]*alfa
+            draw.point((i,j),(int(a),int(b),int(c)))
+    image.save("add_alfa/res1.jpg")
+
+def increase_in_sharpness():
+    #povishenie rezkosti
+    f1=[[0,0,0],[0,2,0],[0,0,0]]
+    f2=[[1./9,1./9,1./9],[1./9,1./9,1./9],[1./9,1./9,1./9]]
+    n=3
+    image=Image.open("olen.jpg")
+    draw=ImageDraw.Draw(image)
+    width=image.size[0]
+    height=image.size[1]
+    pix=image.load()
+    for i in range(n/2,width-n/2,n):
+        for j in range(n/2,height-n/2,n):
+            r=[0,0,0]
+            for k in range(3):
+                for p in range(-(n-1)//2, (n+1)//2):
+                    for q in range (-(n-1)//2, (n+1)//2):
+                        r[k]+=(f1[n//2+p][q+n//2]-f2[n//2+p][q+n//2])*pix[i+p,j+q][k]
+                        #print r
+            draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
+    image.save("increase_in_sharpness/res1.jpg")
+
+
 def main():
     #laplassian()
     #median_filtr()
-    minus()
+    add_alfa(0.5);
+    #minus()
+    #box_filter()
     #step_filter(1.2)
-    #gauss_filter(1);
+    #gauss_filter(1.5);
     #increase_in_clearness()
+    #increase_in_sharpness()
 
 if __name__ == "__main__":
     main()
