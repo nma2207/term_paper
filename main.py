@@ -3,21 +3,9 @@ import random
 import math
 from PIL import Image, ImageDraw, ImageEnhance
 
-def sort(f,n):
-    for k in range(2,-1,-1):
-        for i in range (n*n):
-            for j in range (n*n-1):
-                #print j,k
-                if(f[j][k]>f[j+1][k]):
-                    f[j],f[j+1]=f[j+1],f[j]
-                    #for p in range(3):
-                     #   #f[j][k],f[j+1][k]=f[j+1][k],f[j][k]
-                     #   t=f[j][p]
-                     #   f[j][p]=f[j+1][p]
-                     #   f[j+1][p]=t
 
 def step_filter(gamma):
-    image=Image.open("olen.jpg")
+    image=Image.open("work.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -28,34 +16,35 @@ def step_filter(gamma):
             b = int(((pix[i,j][1] / 255.) ** gamma)*255)
             c = int(((pix[i,j][2] / 255.) ** gamma)*255)
             draw.point((i,j),(a,b,c))
-    image.save("step_filter/res1.jpg", "JPEG")
+    image.save("step_filter/res2.jpg", "JPEG")
     del draw
 
 def median_filtr():
-    image=Image.open("olen.jpg")
+    image=Image.open("test.jpg")
+    corn=[[0,1,0],[1,1,1],[0,1,0]]
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
     pix=image.load()
-    n=2
-    for i in range(0,width-n,n):
-        for j in range(0,height-n,n):
+    n=3
+    for i in range(n/2,width-n/2):
+        for j in range(n/2,height-n/2):
             f = []
             for p in range(n):
                 for q in range(n):
-                    f.append(pix[i+p,j+q])
+                    if corn[p][q]==1:
+                        f.append(pix[i+p-n/2, j+q-n/2])
             #f=[[pix[l,m] for l in range(j,j+n)] for m in range (i,i+n)]
-            sort(f,n);
-            for p in range(n):
-                for q in range(n):
-                    draw.point((i+p,j+q),(f[(n*n+1)/2][0],f[(n*n+1)/2][1],f[(n*n+1)/2][2]))
+            f.sort()
+            #print len(f)
+            draw.point((i,j),(f[(len(f)+1)/2]))
     image.save("median_filter/res1.jpg", "JPEG")
     del draw
 
 def minus():
-    image1=Image.open("olen.jpg")
+    image1=Image.open("test.jpg")
     draw1=ImageDraw.Draw(image1)
-    image2=Image.open("res52.jpg")
+    image2=Image.open("median_filter/res1.jpg")
     draw2=ImageDraw.ImageDraw(image2)
     width=image1.size[0]
     height=image1.size[1]
@@ -191,15 +180,16 @@ def increase_in_sharpness():
                         #print r
             draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
     image.save("increase_in_sharpness/res1.jpg")
+    Image._show(image)
 
 
 def main():
     #laplassian()
-    #median_filtr()
-    add_alfa(0.5);
-    #minus()
+    median_filtr()
+    #add_alfa(0.5);
+    minus()
     #box_filter()
-    #step_filter(1.2)
+    #step_filter(0.7)
     #gauss_filter(1.5);
     #increase_in_clearness()
     #increase_in_sharpness()
