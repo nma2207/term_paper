@@ -182,17 +182,78 @@ def increase_in_sharpness():
     image.save("increase_in_sharpness/res1.jpg")
     Image._show(image)
 
+def addapt_loc_filter():
+    image=Image.open("olen.jpg")
+    draw=ImageDraw.Draw(image)
+    width=image.size[0]
+    height=image.size[1]
+    pix=image.load()
+
+    q=[]
+    for i in range(width):
+        for j in range(height):
+            q.append(pix[i,j])
+    gl_disp = disp(q, width * height)
+    print gl_disp
+    n=3
+    for i in range(n//2, width-n//2):
+        for j in range(n//2, height-n//2):
+            #print i-n//2,i+n//2+1,j-n//2,j+n//2+1
+            #d=disp(pix[i-n//2:i+n//2+1,j-n//2:j+n//2+1],n,n)
+            r=[]
+            for p in range(-(n - 1) // 2, (n + 1) // 2):
+                for q in range(-(n - 1) // 2, (n + 1) // 2):
+                    r.append(pix[i+p,j+q])
+            d=disp(r,n*n)
+            m_l=mean(r,n*n)
+            res=[.0,.0,.0]
+            for p in range(3):
+                k=0.0
+                if(d[p]<gl_disp[p]):
+                    k=1
+                else:
+                    k=d[p]/gl_disp[p]
+                res[p]=int(pix[i,j][p]-k*(pix[i,j][p]-m_l[p]))
+            draw.point((i,j),(res[0],res[1],res[2]))
+    image.save("addapt_loc_filter/res1.jpg")
+
+
+
+
+def mean(pix, n):
+    a=[.0,.0,.0]
+    for i in range(n):
+        for p in range(3):
+            a[p]+=pix[i][p]
+
+    a[0]/=n
+    a[1] /= n
+    a[2] /= n
+    return a
+
+
+def disp(pix,n):
+    res=[.0,.0,.0]
+    m=mean(pix,n)
+    for i in range(n):
+        for p in range(3):
+            res[p]+=(m[p]-pix[i][p])**2
+    for p in range(3):
+        res[p]/=n;
+    return res
+
 
 def main():
     #laplassian()
-    median_filtr()
+    #median_filtr()
     #add_alfa(0.5);
-    minus()
+    #minus()
     #box_filter()
     #step_filter(0.7)
     #gauss_filter(1.5);
     #increase_in_clearness()
     #increase_in_sharpness()
+    addapt_loc_filter()
 
 if __name__ == "__main__":
     main()
