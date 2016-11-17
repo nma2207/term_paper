@@ -183,7 +183,7 @@ def increase_in_sharpness():
     Image._show(image)
 
 def addapt_loc_filter():
-    image=Image.open("olen.jpg")
+    image=Image.open("test.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -215,7 +215,7 @@ def addapt_loc_filter():
                     k=d[p]/gl_disp[p]
                 res[p]=int(pix[i,j][p]-k*(pix[i,j][p]-m_l[p]))
             draw.point((i,j),(res[0],res[1],res[2]))
-    image.save("addapt_loc_filter/res1.jpg")
+    image.save("addapt_loc_filter/res2.jpg")
 
 
 
@@ -257,4 +257,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
