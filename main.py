@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pylab as plb
+import matplotlib.pyplot as plt
 import random
 import math
 from PIL import Image, ImageDraw, ImageEnhance
@@ -42,9 +44,9 @@ def median_filtr():
     del draw
 
 def minus():
-    image1=Image.open("test.jpg")
+    image1=Image.open("olen.jpg")
     draw1=ImageDraw.Draw(image1)
-    image2=Image.open("median_filter/res1.jpg")
+    image2=Image.open("img.jpg")
     draw2=ImageDraw.ImageDraw(image2)
     width=image1.size[0]
     height=image1.size[1]
@@ -183,63 +185,79 @@ def increase_in_sharpness():
     Image._show(image)
 
 def addapt_loc_filter():
-    image=Image.open("test.jpg")
-    draw=ImageDraw.Draw(image)
-    width=image.size[0]
-    height=image.size[1]
-    pix=image.load()
+    im=plb.imread("Dn3IFBOTmeg.jpg")
+    d_gl=disp(im)
+    n=7
+    h=len(im[:])
+    w=len(im[0,:])
+    print h,w
+    #print mean(im[1 - n // 2:1 + n // 2 + 1, 1 - n // 2:1 + n // 2 + 1])
+    for i in range(n/2,h-n/2):
+        for j in range(n/2,w-n/2):
+            m=mean(im[i-n//2:i+n//2+1,j-n//2:j+n//2+1])
+            d=disp(im[i-n//2:i+n//2+1,j-n//2:j+n//2+1])
+            k=np.array([.0,.0,.0])
+            for p in range(3):
 
-    q=[]
-    for i in range(width):
-        for j in range(height):
-            q.append(pix[i,j])
-    gl_disp = disp(q, width * height)
-    print gl_disp
-    n=3
-    for i in range(n//2, width-n//2):
-        for j in range(n//2, height-n//2):
+                if (d[p] < d_gl[p]):
+                    k[p] = 1
+                else:
+                    k[p] = d_gl[p]/d[p]
+            im[i,j]=im[i,j]-k*(im[i,j]-m)
+    plb.imsave("addapt_loc_filter/res3.jpg",im)
+
+                    #image=Image.open("test.jpg")
+    #draw=ImageDraw.Draw(image)
+    #width=image.size[0]
+    #height=image.size[1]
+    #pix=np.array(image.load())
+    #return
+
+    #q=[]
+    #for i in range(width):
+     #   for j in range(height):
+     #       q.append(pix[i,j])
+    #gl_disp = disp(q, width * height)
+    #print gl_disp
+    #n=3
+    #for i in range(n//2, width-n//2):
+       # for j in range(n//2, height-n//2):
             #print i-n//2,i+n//2+1,j-n//2,j+n//2+1
             #d=disp(pix[i-n//2:i+n//2+1,j-n//2:j+n//2+1],n,n)
-            r=[]
-            for p in range(-(n - 1) // 2, (n + 1) // 2):
-                for q in range(-(n - 1) // 2, (n + 1) // 2):
-                    r.append(pix[i+p,j+q])
-            d=disp(r,n*n)
-            m_l=mean(r,n*n)
-            res=[.0,.0,.0]
-            for p in range(3):
-                k=0.0
-                if(d[p]<gl_disp[p]):
-                    k=1
-                else:
-                    k=d[p]/gl_disp[p]
-                res[p]=int(pix[i,j][p]-k*(pix[i,j][p]-m_l[p]))
-            draw.point((i,j),(res[0],res[1],res[2]))
-    image.save("addapt_loc_filter/res2.jpg")
+            #r=[]
+            #for p in range(-(n - 1) // 2, (n + 1) // 2):
+              #  for q in range(-(n - 1) // 2, (n + 1) // 2):
+             #       r.append(pix[i+p,j+q])
+            #d=disp(r,n*n)
+            #m_l=mean(r,n*n)
+            #res=[.0,.0,.0]
+            #for p in range(3):
+                #k=0.0
+                #if(d[p]<gl_disp[p]):
+               #     k=1
+              #  else:
+              #      k=d[p]/gl_disp[p]
+             #   res[p]=int(pix[i,j][p]-k*(pix[i,j][p]-m_l[p]))
+           # draw.point((i,j),(res[0],res[1],res[2]))
+    #image.save("addapt_loc_filter/res2.jpg")
 
 
 
 
-def mean(pix, n):
-    a=[.0,.0,.0]
-    for i in range(n):
-        for p in range(3):
-            a[p]+=pix[i][p]
-
-    a[0]/=n
-    a[1] /= n
-    a[2] /= n
+def mean(pix):
+    a=np.array([.0,.0,.0])
+    for i in range(3):
+        a[i]+=np.sum(pix[:,:,i])
+    a=a*3./pix.size
     return a
 
 
-def disp(pix,n):
-    res=[.0,.0,.0]
-    m=mean(pix,n)
-    for i in range(n):
-        for p in range(3):
-            res[p]+=(m[p]-pix[i][p])**2
-    for p in range(3):
-        res[p]/=n;
+def disp(pix):
+    res=np.array([.0,.0,.0])
+    m=mean(pix)
+    for i in range(3):
+        res[i]+=np.sum((m[i]-pix[:,:,i])**2)
+    res=res*(3./pix.size)
     return res
 
 
