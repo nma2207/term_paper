@@ -184,13 +184,18 @@ def increase_in_sharpness():
     image.save("increase_in_sharpness/res1.jpg")
     Image._show(image)
 
+def make_black_white_im(pix):
+    res=(pix[:,:,0]/3+pix[:,:,1]/3+pix[:,:,2]/3)
+    return res;
+
 def addapt_loc_filter():
-    im=plb.imread("Dn3IFBOTmeg.jpg")
-    d_gl=disp(im)
+    im=plb.imread("temp.jpg")
     n=7
     h=len(im[:])
     w=len(im[0,:])
     print h,w
+
+
     #print mean(im[1 - n // 2:1 + n // 2 + 1, 1 - n // 2:1 + n // 2 + 1])
     for i in range(n/2,h-n/2):
         for j in range(n/2,w-n/2):
@@ -204,7 +209,7 @@ def addapt_loc_filter():
                 else:
                     k[p] = d_gl[p]/d[p]
             im[i,j]=im[i,j]-k*(im[i,j]-m)
-    plb.imsave("addapt_loc_filter/res3.jpg",im)
+    plb.imsave("addapt_loc_filter/res4.jpg",im)
 
                     #image=Image.open("test.jpg")
     #draw=ImageDraw.Draw(image)
