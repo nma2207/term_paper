@@ -44,9 +44,9 @@ def median_filtr():
     del draw
 
 def minus():
-    image1=Image.open("olen.jpg")
+    image1=Image.open("olen_wb.jpg")
     draw1=ImageDraw.Draw(image1)
-    image2=Image.open("img.jpg")
+    image2=Image.open("addapt_loc_filter/res4.jpg")
     draw2=ImageDraw.ImageDraw(image2)
     width=image1.size[0]
     height=image1.size[1]
@@ -185,31 +185,38 @@ def increase_in_sharpness():
     Image._show(image)
 
 def make_black_white_im(pix):
-    res=(pix[:,:,0]/3+pix[:,:,1]/3+pix[:,:,2]/3)
+    res=(pix[:,:,0]//3+pix[:,:,1]//3+pix[:,:,2]//3)
     return res;
 
 def addapt_loc_filter():
-    im=plb.imread("temp.jpg")
+    im=plb.imread("shema.jpg")
+    bwi=make_black_white_im(im)
     n=7
     h=len(im[:])
     w=len(im[0,:])
+    bw=np.zeros((h,w,3))
+    bw[:,:,0]=bwi
+    bw[:,:,1]=bwi
+    bw[:,:,2]=bwi
+    plb.imsave("shema_wb.jpg",bw)
+    d_gl=disp(bwi)
     print h,w
 
 
     #print mean(im[1 - n // 2:1 + n // 2 + 1, 1 - n // 2:1 + n // 2 + 1])
     for i in range(n/2,h-n/2):
         for j in range(n/2,w-n/2):
-            m=mean(im[i-n//2:i+n//2+1,j-n//2:j+n//2+1])
-            d=disp(im[i-n//2:i+n//2+1,j-n//2:j+n//2+1])
-            k=np.array([.0,.0,.0])
-            for p in range(3):
-
-                if (d[p] < d_gl[p]):
-                    k[p] = 1
-                else:
-                    k[p] = d_gl[p]/d[p]
-            im[i,j]=im[i,j]-k*(im[i,j]-m)
-    plb.imsave("addapt_loc_filter/res4.jpg",im)
+            m=mean(bwi[i-n//2:i+n//2+1,j-n//2:j+n//2+1])
+            d=disp(bwi[i-n//2:i+n//2+1,j-n//2:j+n//2+1])
+            k=0
+            if (d< d_gl):
+                k = 1
+            else:
+                k = float(d_gl)/d
+            bw[i,j,0]=bwi[i,j]-k*(bwi[i,j]-m)
+            bw[i, j, 1] = bwi[i, j] - k * (bwi[i, j] - m)
+            bw[i, j, 2] = bwi[i, j] - k * (bwi[i, j] - m)
+    plb.imsave("addapt_loc_filter/res6.jpg",bw)
 
                     #image=Image.open("test.jpg")
     #draw=ImageDraw.Draw(image)
@@ -250,19 +257,15 @@ def addapt_loc_filter():
 
 
 def mean(pix):
-    a=np.array([.0,.0,.0])
-    for i in range(3):
-        a[i]+=np.sum(pix[:,:,i])
-    a=a*3./pix.size
+    a=np.sum(pix)
+    a/=float(pix.size)
     return a
 
 
 def disp(pix):
-    res=np.array([.0,.0,.0])
     m=mean(pix)
-    for i in range(3):
-        res[i]+=np.sum((m[i]-pix[:,:,i])**2)
-    res=res*(3./pix.size)
+    res=np.sum((m-pix)**2)
+    res=res*(1./pix.size)
     return res
 
 
