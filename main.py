@@ -201,9 +201,6 @@ def addapt_loc_filter():
     plb.imsave("shema_wb.jpg",bw)
     d_gl=disp(bwi)
     print h,w
-
-
-    #print mean(im[1 - n // 2:1 + n // 2 + 1, 1 - n // 2:1 + n // 2 + 1])
     for i in range(n/2,h-n/2):
         for j in range(n/2,w-n/2):
             m=mean(bwi[i-n//2:i+n//2+1,j-n//2:j+n//2+1])
