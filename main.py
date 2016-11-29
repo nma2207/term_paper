@@ -189,7 +189,7 @@ def make_black_white_im(pix):
     return res;
 
 def addapt_loc_filter():
-    im=plb.imread("olen.jpg")
+    im=plb.imread("shema.jpg")
     bwi=make_black_white_im(im)
     n=7
     h=len(im[:])
@@ -198,7 +198,7 @@ def addapt_loc_filter():
     bw[:,:,0]=bwi
     bw[:,:,1]=bwi
     bw[:,:,2]=bwi
-    plb.imsave("olen_wb.jpg",bw)
+    plb.imsave("shema_wb.jpg",bw)
     d_gl=np.var(bwi)
     for i in range(n/2,h-n/2):
         for j in range(n/2,w-n/2):
@@ -212,10 +212,8 @@ def addapt_loc_filter():
             bw[i,j,0]=bwi[i,j]-k*(bwi[i,j]-m)
             bw[i, j, 1] = bwi[i, j] - k * (bwi[i, j] - m)
             bw[i, j, 2] = bwi[i, j] - k * (bwi[i, j] - m)
-            #if(bw[i,j,0]<0 or bw[i,j,0]>255):
-            #    print "error!!!"
     bw = np.uint8(bw)
-    plb.imsave("addapt_loc_filter/res9.jpg",bw)
+    plb.imsave("addapt_loc_filter/res8.jpg",bw)
 
                     #image=Image.open("test.jpg")
     #draw=ImageDraw.Draw(image)
