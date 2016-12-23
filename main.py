@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageEnhance
 
 
 def step_filter(gamma):
-    image=Image.open("work.jpg")
+    image=Image.open("kosmichi.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -18,11 +18,11 @@ def step_filter(gamma):
             b = int(((pix[i,j][1] / 255.) ** gamma)*255)
             c = int(((pix[i,j][2] / 255.) ** gamma)*255)
             draw.point((i,j),(a,b,c))
-    image.save("step_filter/res2.jpg", "JPEG")
+    image.save("step_filter/res3.jpg", "JPEG")
     del draw
 
 def median_filtr():
-    image=Image.open("test.jpg")
+    image=Image.open("kosmichi.jpg")
     corn=[[0,1,0],[1,1,1],[0,1,0]]
     draw=ImageDraw.Draw(image)
     width=image.size[0]
@@ -40,7 +40,7 @@ def median_filtr():
             f.sort()
             #print len(f)
             draw.point((i,j),(f[(len(f)+1)/2]))
-    image.save("median_filter/res1.jpg", "JPEG")
+    image.save("median_filter/res2.jpg", "JPEG")
     del draw
 
 def minus():
@@ -60,7 +60,7 @@ def minus():
     del draw2
 
 def laplassian():
-    image=Image.open("olen.jpg")
+    image=Image.open("kosmichi.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -86,7 +86,7 @@ def laplassian():
             #       for q in range(-(n-1)/2, (n-1)/2+1):
             #           r[k]+=(f[p+n/2][q+n/2]*pix[i+p,j+q][k])
             draw.point((i,j),(pix[i,j][0]+d[0][j][i],pix[i,j][1]+d[1][j][i],pix[i,j][2]+d[2][j][i]))
-    image.save("laplassian/res1.jpg", "JPEG")
+    image.save("laplassian/res2.jpg", "JPEG")
     del draw
 
 def gauss(x,y,sigma):
@@ -96,7 +96,7 @@ def gauss(x,y,sigma):
 def gauss_filter(sigma):
     n=3
     f=[[gauss(i,j,sigma) for j in range (-(n-1)//2, (n+1)//2)] for i in range(-(n-1)//2, (n+1)//2)]
-    image=Image.open("olen.jpg")
+    image=Image.open("kosmichi.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -109,12 +109,12 @@ def gauss_filter(sigma):
                     for q in range (-(n-1)//2, (n+1)//2):
                         r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
             draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
-    image.save("gauss_filter/res1.jpg")
+    image.save("gauss_filter/res2.jpg")
 
 def increase_in_clearness():
     f=[[-1,-1,-1],[-1,9,-1],[-1,-1,-1]]
     n=3
-    image=Image.open("olen.jpg")
+    image=Image.open("kosmichi.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -127,12 +127,12 @@ def increase_in_clearness():
                     for q in range (-(n-1)//2, (n+1)//2):
                         r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
             draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
-    image.save("increase_in_clearness/res1.jpg")
+    image.save("increase_in_clearness/res2.jpg")
 
 def box_filter():
     f=[[1./9,1./9,1./9],[1./9,1./9,1./9],[1./9,1./9,1./9]]
     n=3
-    image=Image.open("olen.jpg")
+    image=Image.open("kosmichi.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -146,10 +146,10 @@ def box_filter():
                         r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
                         #print r
             draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
-    image.save("box_filter/res1.jpg")
+    image.save("box_filter/res2.jpg")
 
 def add_alfa(alfa):
-    image=Image.open("olen.jpg")
+    image=Image.open("kosmichi.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -160,14 +160,14 @@ def add_alfa(alfa):
             b=pix[i,j][1]*alfa
             c=pix[i,j][2]*alfa
             draw.point((i,j),(int(a),int(b),int(c)))
-    image.save("add_alfa/res1.jpg")
+    image.save("add_alfa/res2.jpg")
 
 def increase_in_sharpness():
     #povishenie rezkosti
     f1=[[0,0,0],[0,2,0],[0,0,0]]
     f2=[[1./9,1./9,1./9],[1./9,1./9,1./9],[1./9,1./9,1./9]]
     n=3
-    image=Image.open("olen.jpg")
+    image=Image.open("kosmichi.jpg")
     draw=ImageDraw.Draw(image)
     width=image.size[0]
     height=image.size[1]
@@ -181,7 +181,7 @@ def increase_in_sharpness():
                         r[k]+=(f1[n//2+p][q+n//2]-f2[n//2+p][q+n//2])*pix[i+p,j+q][k]
                         #print r
             draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
-    image.save("increase_in_sharpness/res1.jpg")
+    image.save("increase_in_sharpness/res2.jpg")
     Image._show(image)
 
 def make_black_white_im(pix):
@@ -189,7 +189,7 @@ def make_black_white_im(pix):
     return res;
 
 def addapt_loc_filter():
-    im=plb.imread("shema.jpg")
+    im=plb.imread("kosmichi.jpg")
     bwi=make_black_white_im(im)
     n=7
     h=len(im[:])
@@ -198,7 +198,7 @@ def addapt_loc_filter():
     bw[:,:,0]=bwi
     bw[:,:,1]=bwi
     bw[:,:,2]=bwi
-    plb.imsave("shema_wb.jpg",bw)
+    plb.imsave("kosmichi_wb.jpg",bw)
     d_gl=np.var(bwi)
     for i in range(n/2,h-n/2):
         for j in range(n/2,w-n/2):
@@ -213,7 +213,7 @@ def addapt_loc_filter():
             bw[i, j, 1] = bwi[i, j] - k * (bwi[i, j] - m)
             bw[i, j, 2] = bwi[i, j] - k * (bwi[i, j] - m)
     bw = np.uint8(bw)
-    plb.imsave("addapt_loc_filter/res8.jpg",bw)
+    plb.imsave("addapt_loc_filter/res9.jpg",bw)
 
                     #image=Image.open("test.jpg")
     #draw=ImageDraw.Draw(image)
@@ -267,15 +267,15 @@ def disp(pix):
 
 
 def main():
-    #laplassian()
-    #median_filtr()
-    #add_alfa(0.5);
+    laplassian()
+    median_filtr()
+    add_alfa(0.5);
     #minus()
-    #box_filter()
-    #step_filter(0.7)
-    #gauss_filter(1.5);
-    #increase_in_clearness()
-    #increase_in_sharpness()
+    box_filter()
+    step_filter(0.7)
+    gauss_filter(1.5);
+    increase_in_clearness()
+    increase_in_sharpness()
     addapt_loc_filter()
 
 if __name__ == "__main__":
