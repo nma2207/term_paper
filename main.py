@@ -214,6 +214,20 @@ def addapt_loc_filter():
             bw[i, j, 2] = bwi[i, j] - k * (bwi[i, j] - m)
     bw = np.uint8(bw)
     plb.imsave("addapt_loc_filter/res9.jpg",bw)
+def convolution(f,h,n):
+    F=np.fft.fft2(f)
+    H=np.fft.fft2(h)
+    N=np.fft.fft2(n)
+    height=F.shape[0]
+    width=F.shape[1]
+    n=H.shape[0]
+    m=H.shape[1]
+    G=np.zeros((height, width), dtype=np.complex)
+    for i in range(n/2,height-n/2+1):
+        for j in range(m/2, width-m/2+1):
+            G[i - n // 2:i + n // 2, j - m // 2:j + m // 2] = F[i - n // 2:i + n // 2, j - m // 2:j + m // 2] * H+N
+    g=np.fft.ifft2(G)
+    return g
 
 def wiener_filter(g, h,k):
     H=np.fft.fft2(h)
@@ -236,6 +250,7 @@ def wiener_filter(g, h,k):
     print ' '
     f=np.fft.ifft2(F)
     print f
+    return f
 
 
 def main():
