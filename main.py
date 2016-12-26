@@ -186,7 +186,7 @@ def increase_in_sharpness():
 
 def make_black_white_im(pix):
     res=(pix[:,:,0]//3+pix[:,:,1]//3+pix[:,:,2]//3)
-    return res;
+    return res
 
 def addapt_loc_filter():
     im=plb.imread("kosmichi.jpg")
@@ -215,68 +215,41 @@ def addapt_loc_filter():
     bw = np.uint8(bw)
     plb.imsave("addapt_loc_filter/res9.jpg",bw)
 
-                    #image=Image.open("test.jpg")
-    #draw=ImageDraw.Draw(image)
-    #width=image.size[0]
-    #height=image.size[1]
-    #pix=np.array(image.load())
-    #return
+def wiener_filter(g, h,k):
+    H=np.fft.fft2(h)
+    G=np.fft.fft2(g)
+    r=(1/H)*(abs(H)**2)/(abs(H)**2+k)
+    #What do I do, when H have 0????
+    #How to use mult???
 
-    #q=[]
-    #for i in range(width):
-     #   for j in range(height):
-     #       q.append(pix[i,j])
-    #gl_disp = disp(q, width * height)
-    #print gl_disp
-    #n=3
-    #for i in range(n//2, width-n//2):
-       # for j in range(n//2, height-n//2):
-            #print i-n//2,i+n//2+1,j-n//2,j+n//2+1
-            #d=disp(pix[i-n//2:i+n//2+1,j-n//2:j+n//2+1],n,n)
-            #r=[]
-            #for p in range(-(n - 1) // 2, (n + 1) // 2):
-              #  for q in range(-(n - 1) // 2, (n + 1) // 2):
-             #       r.append(pix[i+p,j+q])
-            #d=disp(r,n*n)
-            #m_l=mean(r,n*n)
-            #res=[.0,.0,.0]
-            #for p in range(3):
-                #k=0.0
-                #if(d[p]<gl_disp[p]):
-               #     k=1
-              #  else:
-              #      k=d[p]/gl_disp[p]
-             #   res[p]=int(pix[i,j][p]-k*(pix[i,j][p]-m_l[p]))
-           # draw.point((i,j),(res[0],res[1],res[2]))
-    #image.save("addapt_loc_filter/res2.jpg")
-
-
-
-
-def mean(pix):
-    a=np.sum(pix)
-    a/=float(pix.size)
-    return a
-
-
-def disp(pix):
-    m=mean(pix)
-    res=np.sum((m-pix)**2)
-    res=res*(1./pix.size)
-    return res
+    height=G.shape[0]
+    width=G.shape[1]
+    n=H.shape[0]
+    m=H.shape[1]
+    F = np.zeros((height, width),dtype=np.complex)
+    for i in range(n/2,height-n/2+1):
+        for j in range(m/2, width-m/2+1):
+            F[i-n//2:i+n//2,j-m//2:j+m//2]=G[i-n//2:i+n//2,j-m//2:j+m//2]*r
+            print G[i-n//2:i+n//2,j-m//2:j+m//2]*r
+    print '\n'
+    print F
+    print ' '
+    f=np.fft.ifft2(F)
+    print f
 
 
 def main():
-    laplassian()
-    median_filtr()
-    add_alfa(0.5);
+    #laplassian()
+    #median_filtr()
+    #add_alfa(0.5);
     #minus()
-    box_filter()
-    step_filter(0.7)
-    gauss_filter(1.5);
-    increase_in_clearness()
-    increase_in_sharpness()
-    addapt_loc_filter()
+    #box_filter()
+    #step_filter(0.7)
+    #gauss_filter(1.5);
+    #increase_in_clearness()
+    #increase_in_sharpness()
+    #addapt_loc_filter()
+    wiener_filter(np.array([[1,2,3],[2,1,3],[1,1,3]]), np.array([[1,3],[2,7]]),np.array([[1,1],[1,1]]))
 
 if __name__ == "__main__":
     main()
