@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import random
 import math
 from PIL import Image, ImageDraw, ImageEnhance
-
+import scipy
+from scipy import signal
 
 def step_filter(gamma):
     image=Image.open("kosmichi.jpg")
@@ -185,7 +186,18 @@ def increase_in_sharpness():
     Image._show(image)
 
 def make_black_white_im(pix):
-    res=(pix[:,:,0]//3+pix[:,:,1]//3+pix[:,:,2]//3)
+    #im1=(pix[:,:,0])/3
+    #im2=(pix[:,:,1])/3
+    #im3=(pix[:,:,2])/3
+    #res=im1+im2+im3
+    h=pix.shape[0]
+    w=pix.shape[1]
+    res=np.zeros((h,w))
+    for i in range(h):
+        for j in range(w):
+            res[i,j]=np.sum(pix[i,j])
+    res=res//3
+    res=255-res
     return res
 
 def addapt_loc_filter():
@@ -215,19 +227,22 @@ def addapt_loc_filter():
     bw = np.uint8(bw)
     plb.imsave("addapt_loc_filter/res9.jpg",bw)
 def convolution(f,h,n):
-    F=np.fft.fft2(f)
-    H=np.fft.fft2(h)
-    N=np.fft.fft2(n)
-    height=F.shape[0]
-    width=F.shape[1]
-    n=H.shape[0]
-    m=H.shape[1]
-    G=np.zeros((height, width), dtype=np.complex)
-    for i in range(n/2,height-n/2+1):
-        for j in range(m/2, width-m/2+1):
-            G[i - n // 2:i + n // 2, j - m // 2:j + m // 2] = F[i - n // 2:i + n // 2, j - m // 2:j + m // 2] * H+N
-    g=np.fft.ifft2(G)
-    return g
+    #F=np.fft.fft2(f)
+    #H=np.fft.fft2(h)
+    #N=np.fft.fft2(n)
+    #height=F.shape[0]
+    #width=F.shape[1]
+    #n=H.shape[0]
+    #m=H.shape[1]
+    #G=np.zeros((height, width), dtype=np.complex)
+    #for i in range(n/2,height-n/2+1):
+    #    for j in range(m/2, width-m/2+1):
+    #        G[i - n // 2:i + n // 2, j - m // 2:j + m // 2] = F[i - n // 2:i + n // 2, j - m // 2:j + m // 2] * H+N
+    #g=np.fft.ifft2(G)
+    result=scipy.signal.convolve2d(f,h)
+    result=result%255
+    return result
+    #return g
 
 def wiener_filter(g, h,k):
     H=np.fft.fft2(h)
@@ -244,12 +259,12 @@ def wiener_filter(g, h,k):
     for i in range(n/2,height-n/2+1):
         for j in range(m/2, width-m/2+1):
             F[i-n//2:i+n//2,j-m//2:j+m//2]=G[i-n//2:i+n//2,j-m//2:j+m//2]*r
-            print G[i-n//2:i+n//2,j-m//2:j+m//2]*r
-    print '\n'
-    print F
-    print ' '
+            #print G[i-n//2:i+n//2,j-m//2:j+m//2]*r
+   # print '\n'
+    #print F
+   # print ' '
     f=np.fft.ifft2(F)
-    print f
+    #print f
     return f
 
 
@@ -264,7 +279,19 @@ def main():
     #increase_in_clearness()
     #increase_in_sharpness()
     #addapt_loc_filter()
-    wiener_filter(np.array([[1,2,3],[2,1,3],[1,1,3]]), np.array([[1,3],[2,7]]),np.array([[1,1],[1,1]]))
+
+    #wiener_filter(np.array([[1,2,3],[2,1,3],[1,1,3]]), np.array([[1,3],[2,7]]),np.array([[1,1],[1,1]]))
+    im = plb.imread("lena.bmp")
+
+    bw=make_black_white_im(im)
+    con = convolution(bw, np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])/9., np.array([[1, 1], [1, 1]]))
+    #con=wiener_filter(con,np.array([[1, 1, 1], [1, -4, 1], [1, 1, 1]]), np.array([[1,1],[1,1]]))
+    bwi=np.zeros((con.shape[0],con.shape[1],3))
+    bwi[:,:,0]=con
+    bwi[:, :, 1] = con
+    bwi[:, :, 2] = con
+    print bwi
+    plb.imsave("convolution/res2.jpg", bwi)
 
 if __name__ == "__main__":
     main()
