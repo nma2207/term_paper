@@ -6,7 +6,7 @@ import math
 from PIL import Image, ImageDraw, ImageEnhance
 import scipy
 from scipy import signal
-
+from scipy import ndimage
 def step_filter(gamma):
     image=Image.open("kosmichi.jpg")
     draw=ImageDraw.Draw(image)
@@ -94,23 +94,25 @@ def gauss(x,y,sigma):
     twoPi = math.pi * 2
     return (1/(twoPi*sigma*sigma)*math.exp(-(x*x+y*y)/float(2*sigma*sigma)))
 
-def gauss_filter(sigma):
-    n=3
-    f=[[gauss(i,j,sigma) for j in range (-(n-1)//2, (n+1)//2)] for i in range(-(n-1)//2, (n+1)//2)]
-    image=Image.open("kosmichi.jpg")
-    draw=ImageDraw.Draw(image)
-    width=image.size[0]
-    height=image.size[1]
-    pix=image.load()
-    for i in range(n/2,width-n/2):
-        for j in range(n/2,height-n/2):
-            r=[0,0,0]
-            for k in range(3):
-                for p in range(-(n-1)//2, (n+1)//2):
-                    for q in range (-(n-1)//2, (n+1)//2):
-                        r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
-            draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
-    image.save("gauss_filter/res2.jpg")
+def gauss_filter(sigma,n,m):
+    #n=3
+    f=np.array([[gauss(i,j,sigma) for j in range (-(m-1)//2, (m+1)//2)] for i in range(-(n-1)//2, (n+1)//2)])
+    print 'go'
+    #image=Image.open("kosmichi.jpg")
+    #draw=ImageDraw.Draw(image)
+    #width=image.size[0]
+   # height=image.size[1]
+    #pix=image.load()
+    #for i in range(n/2,width-n/2):
+     #   for j in range(n/2,height-n/2):
+     #       r=[0,0,0]
+     #       for k in range(3):
+      #          for p in range(-(n-1)//2, (n+1)//2):
+      #              for q in range (-(n-1)//2, (n+1)//2):
+     #                   r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
+      #      draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
+    #image.save("gauss_filter/res2.jpg")
+    return f
 
 def increase_in_clearness():
     f=[[-1,-1,-1],[-1,9,-1],[-1,-1,-1]]
@@ -227,23 +229,25 @@ def addapt_loc_filter():
     bw = np.uint8(bw)
     plb.imsave("addapt_loc_filter/res9.jpg",bw)
 def convolution(f,h,n):
-    #F=np.fft.fft2(f)
-    #H=np.fft.fft2(h)
-    #N=np.fft.fft2(n)
-    #height=F.shape[0]
-    #width=F.shape[1]
-    #n=H.shape[0]
-    #m=H.shape[1]
-    #G=np.zeros((height, width), dtype=np.complex)
-    #for i in range(n/2,height-n/2+1):
-    #    for j in range(m/2, width-m/2+1):
-    #        G[i - n // 2:i + n // 2, j - m // 2:j + m // 2] = F[i - n // 2:i + n // 2, j - m // 2:j + m // 2] * H+N
-    #g=np.fft.ifft2(G)
+
     result=scipy.signal.convolve2d(f,h)
-    result=result%255
+    #result=result%255
     return result
     #return g
-
+def inverse_filter(g,h):
+    H=np.fft.fft2(h)
+    G=np.fft.fft2(g)
+    height = G.shape[0]
+    width = G.shape[1]
+    n = H.shape[0]
+    m = H.shape[1]
+    F = np.zeros((height, width), dtype=np.complex)
+    for i in range(0,height):
+        for j in range(0, width):
+            F[i,j]=G[i,j]/H[i%n,j%m]
+    f=np.fft.ifft2(F)
+    f=np.real(f)
+    return f
 def wiener_filter(g, h,k):
     H=np.fft.fft2(h)
     G=np.fft.fft2(g)
@@ -284,14 +288,22 @@ def main():
     im = plb.imread("lena.bmp")
 
     bw=make_black_white_im(im)
-    con = convolution(bw, np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]])/9., np.array([[1, 1], [1, 1]]))
-    #con=wiener_filter(con,np.array([[1, 1, 1], [1, -4, 1], [1, 1, 1]]), np.array([[1,1],[1,1]]))
+    h = gauss_filter(1, 5, 5)
+    con=scipy.ndimage.gaussian_filter(bw,0.3)
+    print h
+    #con = convolution(bw, h, np.array([[1, 1], [1, 1]]))
+    print 'go'
+    filt=inverse_filter(con,h)
     bwi=np.zeros((con.shape[0],con.shape[1],3))
     bwi[:,:,0]=con
     bwi[:, :, 1] = con
     bwi[:, :, 2] = con
-    print bwi
-    plb.imsave("convolution/res2.jpg", bwi)
-
+    #print bwi
+    plb.imsave("convolution/res4.jpg", bwi)
+    bwi = np.zeros((filt.shape[0],filt.shape[1], 3))
+    bwi[:, :, 0] = filt
+    bwi[:, :, 1] = filt
+    bwi[:, :, 2] = filt
+    plb.imsave("inverse_filter/res1.jpg", bwi)
 if __name__ == "__main__":
     main()
