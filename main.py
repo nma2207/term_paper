@@ -229,8 +229,9 @@ def addapt_loc_filter():
     bw = np.uint8(bw)
     plb.imsave("addapt_loc_filter/res9.jpg",bw)
 def convolution(f,h,n):
-
-    result=scipy.signal.convolve2d(f,h)
+    print 'fft',np.fft.fft2(h)
+    result=scipy.ndimage.filters.convolve(f,h)
+    #result=scipy.signal.convolve2d(f,h)
     #result=result%255
     return result
     #return g
@@ -242,9 +243,10 @@ def inverse_filter(g,h):
     n = H.shape[0]
     m = H.shape[1]
     F = np.zeros((height, width), dtype=np.complex)
-    for i in range(0,height):
-        for j in range(0, width):
-            F[i,j]=G[i,j]/H[i%n,j%m]
+    for i in range(n/2,width-n/2):
+        for j in range(m/2,height-m/2):
+            F[i - n // 2:i + n // 2+1, j - m // 2:j + m // 2+1] = G[i - n // 2:i + n // 2+1, j - m // 2:j + m // 2+1] /H
+
     f=np.fft.ifft2(F)
     f=np.real(f)
     return f
@@ -288,19 +290,23 @@ def main():
     im = plb.imread("lena.bmp")
 
     bw=make_black_white_im(im)
-    h = gauss_filter(1, 5, 5)
-    con=scipy.ndimage.gaussian_filter(bw,0.3)
+    #bw=bw/255.0
+    print bw
+    h = gauss_filter(1, 3, 3)
+    #con=scipy.ndimage.gaussian_filter(bw,0.3)
     print h
-    #con = convolution(bw, h, np.array([[1, 1], [1, 1]]))
+    con = convolution(bw, h, np.array([[1, 1], [1, 1]]))
     print 'go'
     filt=inverse_filter(con,h)
     bwi=np.zeros((con.shape[0],con.shape[1],3))
+    #con=con*255
     bwi[:,:,0]=con
     bwi[:, :, 1] = con
     bwi[:, :, 2] = con
     #print bwi
     plb.imsave("convolution/res4.jpg", bwi)
     bwi = np.zeros((filt.shape[0],filt.shape[1], 3))
+    #filt=filt*255
     bwi[:, :, 0] = filt
     bwi[:, :, 1] = filt
     bwi[:, :, 2] = filt
