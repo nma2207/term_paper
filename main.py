@@ -229,9 +229,9 @@ def addapt_loc_filter():
     bw = np.uint8(bw)
     plb.imsave("addapt_loc_filter/res9.jpg",bw)
 def convolution(f,h,n):
-    print 'fft',np.fft.fft2(h)
-    result=scipy.ndimage.filters.convolve(f,h)
-    #result=scipy.signal.convolve2d(f,h)
+    #print 'fft',np.fft.fft2(h)
+    #result=scipy.ndimage.filters.convolve(f,h)
+    result=scipy.signal.convolve2d(f,h)
     #result=result%255
     return result
     #return g
@@ -275,41 +275,50 @@ def wiener_filter(g, h,k):
 
 
 def main():
-    #laplassian()
-    #median_filtr()
-    #add_alfa(0.5);
-    #minus()
-    #box_filter()
-    #step_filter(0.7)
-    #gauss_filter(1.5);
-    #increase_in_clearness()
-    #increase_in_sharpness()
-    #addapt_loc_filter()
 
-    #wiener_filter(np.array([[1,2,3],[2,1,3],[1,1,3]]), np.array([[1,3],[2,7]]),np.array([[1,1],[1,1]]))
     im = plb.imread("lena.bmp")
 
     bw=make_black_white_im(im)
     #bw=bw/255.0
     print bw
-    h = gauss_filter(1, 3, 3)
+    h = gauss_filter(1, 53, 53)
     #con=scipy.ndimage.gaussian_filter(bw,0.3)
-    print h
+    print 'h=',h
     con = convolution(bw, h, np.array([[1, 1], [1, 1]]))
+    print 'con'
+    for i in range(con.shape[0]):
+        for j in range(con.shape[1]):
+            if(con[i,j]>255):
+                print 'ERROR'
+
+    con1 = np.int32(con)
+    print con
     print 'go'
-    filt=inverse_filter(con,h)
+    filt=inverse_filter(con1,h)
+    print filt
     bwi=np.zeros((con.shape[0],con.shape[1],3))
     #con=con*255
-    bwi[:,:,0]=con
-    bwi[:, :, 1] = con
-    bwi[:, :, 2] = con
+    #con1=np.zeros((con.shape[0],con.shape[1]))
+
+    print 'con1=',con1
+    bwi[:,:,0]=con1
+    bwi[:, :, 1] =con1
+    bwi[:, :, 2] = con1
     #print bwi
-    plb.imsave("convolution/res4.jpg", bwi)
+    #plt.plot(bwi)
+    plb.imsave("convolution/res6.jpg", bwi)
+    print 'filt'
+    for i in range(filt.shape[0]):
+        for j in range(filt.shape[1]):
+            if(filt[i,j]>255):
+                print 'ERROR'
     bwi = np.zeros((filt.shape[0],filt.shape[1], 3))
     #filt=filt*255
-    bwi[:, :, 0] = filt
-    bwi[:, :, 1] = filt
-    bwi[:, :, 2] = filt
+    filt1=np.int32(filt)
+    bwi[:, :, 0] = filt1
+    bwi[:, :, 1] = filt1
+    bwi[:, :, 2] = filt1
+    print 'filt1=',filt1
     plb.imsave("inverse_filter/res1.jpg", bwi)
 if __name__ == "__main__":
     main()
