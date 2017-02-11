@@ -92,11 +92,12 @@ def laplassian():
 
 def gauss(x,y,sigma):
     twoPi = math.pi * 2
-    return (1/(twoPi*sigma*sigma)*math.exp(-(x*x+y*y)/float(2*sigma*sigma)))
+    return (1/math.sqrt(twoPi)*sigma)*math.exp(-(x*x+y*y)/float(2*sigma*sigma))
 
 def gauss_filter(sigma,n,m):
     #n=3
     f=np.array([[gauss(i,j,sigma) for j in range (-(m-1)//2, (m+1)//2)] for i in range(-(n-1)//2, (n+1)//2)])
+    f = f / np.sum(f)
     print 'go'
     #image=Image.open("kosmichi.jpg")
     #draw=ImageDraw.Draw(image)
@@ -199,7 +200,7 @@ def make_black_white_im(pix):
         for j in range(w):
             res[i,j]=np.sum(pix[i,j])
     res=res//3
-    res=255-res
+
     return res
 
 def addapt_loc_filter():
@@ -236,42 +237,35 @@ def convolution(f,h,n):
     return result
     #return g
 def inverse_filter(g,h):
-    H=np.fft.fft2(h)
-    G=np.fft.fft2(g)
-    height = G.shape[0]
-    width = G.shape[1]
-    n = H.shape[0]
-    m = H.shape[1]
-    F = np.zeros((height, width), dtype=np.complex)
-    for i in range(n/2,width-n/2):
-        for j in range(m/2,height-m/2):
-            F[i - n // 2:i + n // 2+1, j - m // 2:j + m // 2+1] = G[i - n // 2:i + n // 2+1, j - m // 2:j + m // 2+1] /H
-
+    width_g=g.shape[0]
+    height_g=g.shape[1]
+    width_h=h.shape[0]
+    height_h=h.shape[1]
+    g1=np.zeros((2*width_g,2*height_g))
+    h1=np.zeros((2*width_g, 2*height_g))
+    g1[0:width_g,0:height_g]=g
+    h1[0:width_h, 0:height_h] = h
+    G=np.fft.fft2(g1)
+    H=np.fft.fft2(h1)
+    F=G/H
     f=np.fft.ifft2(F)
     f=np.real(f)
+    f=f[0:width_g,0:height_g]
     return f
-def wiener_filter(g, h,k):
-    H=np.fft.fft2(h)
-    G=np.fft.fft2(g)
-    r=(1/H)*(abs(H)**2)/(abs(H)**2+k)
-    #What do I do, when H have 0????
-    #How to use mult???
 
-    height=G.shape[0]
-    width=G.shape[1]
-    n=H.shape[0]
-    m=H.shape[1]
-    F = np.zeros((height, width),dtype=np.complex)
-    for i in range(n/2,height-n/2+1):
-        for j in range(m/2, width-m/2+1):
-            F[i-n//2:i+n//2,j-m//2:j+m//2]=G[i-n//2:i+n//2,j-m//2:j+m//2]*r
-            #print G[i-n//2:i+n//2,j-m//2:j+m//2]*r
-   # print '\n'
-    #print F
-   # print ' '
-    f=np.fft.ifft2(F)
-    #print f
-    return f
+
+def wiener_filter(g, h,k):
+    width_g=g.shape[0]
+    height_g=g.shape[1]
+    width_h=h.shape[0]
+    height_h=h.shape[1]
+    g1=np.zeros((2*width_g,2*height_g))
+    h1=np.zeros((2*width_g, 2*height_g))
+    g1[0:width_g,0:height_g]=g
+    h1[0:width_h, 0:height_h] = h
+    G=np.fft.fft2(g1)
+    H=np.fft.fft2(h1)
+
 
 
 def main():
@@ -281,20 +275,26 @@ def main():
     bw=make_black_white_im(im)
     #bw=bw/255.0
     print bw
-    h = gauss_filter(1, 53, 53)
+    h = gauss_filter(5, 11, 11)
     #con=scipy.ndimage.gaussian_filter(bw,0.3)
     print 'h=',h
     con = convolution(bw, h, np.array([[1, 1], [1, 1]]))
     print 'con'
-    for i in range(con.shape[0]):
-        for j in range(con.shape[1]):
-            if(con[i,j]>255):
-                print 'ERROR'
+    # for i in range(con.shape[0]):
+    #     for j in range(con.shape[1]):
+    #         if(con[i,j]>255):
+    #             print 'ERROR'
 
+    # plt.figure()
+    # plt.subplot(1,2,1)
+    # plt.imshow(bw, cmap='gray')
+    # plt.subplot(1,2,2)
+    # plt.imshow(con, cmap='gray')
+    # plt.show()
     con1 = np.int32(con)
     print con
     print 'go'
-    filt=inverse_filter(con1,h)
+    filt=inverse_filter(con,h)
     print filt
     bwi=np.zeros((con.shape[0],con.shape[1],3))
     #con=con*255
@@ -306,19 +306,30 @@ def main():
     bwi[:, :, 2] = con1
     #print bwi
     #plt.plot(bwi)
-    plb.imsave("convolution/res6.jpg", bwi)
+    #plb.imsave("convolution/res6.jpg", bwi)
+    plt.imsave("convolution/res6.jpg", bwi)
     print 'filt'
-    for i in range(filt.shape[0]):
-        for j in range(filt.shape[1]):
-            if(filt[i,j]>255):
-                print 'ERROR'
+    print filt
+    # for i in range(filt.shape[0]):
+    #     for j in range(filt.shape[1]):
+    #         if(filt[i,j]>255):
+    #             print 'ERROR'
     bwi = np.zeros((filt.shape[0],filt.shape[1], 3))
     #filt=filt*255
     filt1=np.int32(filt)
-    bwi[:, :, 0] = filt1
-    bwi[:, :, 1] = filt1
-    bwi[:, :, 2] = filt1
-    print 'filt1=',filt1
-    plb.imsave("inverse_filter/res1.jpg", bwi)
+
+    plt.figure()
+    plt.subplot(1, 3, 1)
+    plt.imshow(bw, cmap='gray')
+    plt.subplot(1, 3, 2)
+    plt.imshow(con, cmap='gray')
+    plt.subplot(1, 3, 3)
+    plt.imshow(filt, cmap='gray')
+    plt.show()
+    bwi[:, :, 0] = 255-filt
+    bwi[:, :, 1] = 255-filt
+    bwi[:, :, 2] = 255-filt
+    print 'filt1=',filt
+    plt.imsave("inverse_filter/res1.jpg", bwi)
 if __name__ == "__main__":
     main()
