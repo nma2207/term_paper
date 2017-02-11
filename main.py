@@ -320,6 +320,9 @@ def main():
 
     plt.figure()
     plt.subplot(1, 3, 1)
+
+
+
     plt.imshow(bw, cmap='gray')
     plt.subplot(1, 3, 2)
     plt.imshow(con, cmap='gray')
