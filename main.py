@@ -232,7 +232,10 @@ def addapt_loc_filter():
 def convolution(f,h,n):
     #print 'fft',np.fft.fft2(h)
     #result=scipy.ndimage.filters.convolve(f,h)
+    # f1=np.zeros((f.shape[0]+h.shape[0],f.shape[1]+h.shape[1] ))
+    # f1[h.shape[0]//2:h.shape[0]//2+f.shape[0],h.shape[1]//2:h.shape[1]//2+f.shape[1]]=f
     result=scipy.signal.convolve2d(f,h)
+    # result=result[h.shape[0]//2:h.shape[0]//2+f.shape[0],h.shape[1]//2:h.shape[1]//2+f.shape[1]]
     #result=result%255
     return result
     #return g
@@ -265,6 +268,16 @@ def wiener_filter(g, h,k):
     h1[0:width_h, 0:height_h] = h
     G=np.fft.fft2(g1)
     H=np.fft.fft2(h1)
+    k1=np.zeros((2*width_g, 2*height_g))
+    k1[0:k.shape[0],0:k.shape[1]]=k
+    K=np.fft.fft2(k1)
+    #F=(np.abs(H)**2/(H*((np.abs(H)**2))+K))*G
+    F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2)) )) * G
+    f=np.fft.ifft2(F)
+    f=np.real(f)
+    f=f[0:width_g,0:height_g]
+    return f
+
 
 
 
@@ -273,50 +286,24 @@ def main():
     im = plb.imread("lena.bmp")
 
     bw=make_black_white_im(im)
-    #bw=bw/255.0
     print bw
     h = gauss_filter(5, 11, 11)
-    #con=scipy.ndimage.gaussian_filter(bw,0.3)
     print 'h=',h
-    con = convolution(bw, h, np.array([[1, 1], [1, 1]]))
+    con = convolution(bw, h, np.array([[0, 0], [0, 0]]))
     print 'con'
-    # for i in range(con.shape[0]):
-    #     for j in range(con.shape[1]):
-    #         if(con[i,j]>255):
-    #             print 'ERROR'
-
     # plt.figure()
     # plt.subplot(1,2,1)
     # plt.imshow(bw, cmap='gray')
     # plt.subplot(1,2,2)
     # plt.imshow(con, cmap='gray')
     # plt.show()
-    con1 = np.int32(con)
     print con
     print 'go'
     filt=inverse_filter(con,h)
-    print filt
+    #filt=wiener_filter(con,h, np.array([[1,1],[1,1]]))
     bwi=np.zeros((con.shape[0],con.shape[1],3))
-    #con=con*255
-    #con1=np.zeros((con.shape[0],con.shape[1]))
-
-    print 'con1=',con1
-    bwi[:,:,0]=con1
-    bwi[:, :, 1] =con1
-    bwi[:, :, 2] = con1
-    #print bwi
-    #plt.plot(bwi)
-    #plb.imsave("convolution/res6.jpg", bwi)
     plt.imsave("convolution/res6.jpg", bwi)
     print 'filt'
-    print filt
-    # for i in range(filt.shape[0]):
-    #     for j in range(filt.shape[1]):
-    #         if(filt[i,j]>255):
-    #             print 'ERROR'
-    bwi = np.zeros((filt.shape[0],filt.shape[1], 3))
-    #filt=filt*255
-    filt1=np.int32(filt)
 
     plt.figure()
     plt.subplot(1, 3, 1)
@@ -329,10 +316,6 @@ def main():
     plt.subplot(1, 3, 3)
     plt.imshow(filt, cmap='gray')
     plt.show()
-    bwi[:, :, 0] = 255-filt
-    bwi[:, :, 1] = 255-filt
-    bwi[:, :, 2] = 255-filt
-    print 'filt1=',filt
     plt.imsave("inverse_filter/res1.jpg", bwi)
 if __name__ == "__main__":
     main()
