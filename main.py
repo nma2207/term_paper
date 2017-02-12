@@ -278,7 +278,34 @@ def wiener_filter(g, h,k):
     f=f[0:width_g,0:height_g]
     return f
 
+def tickhonov_regularization(g,h):
+    p=np.array([
+        [0,-1,0],
+        [-1, 4, -1],
+        [0,-1,0.0]
+    ])
+    width_g = g.shape[0]
+    height_g = g.shape[1]
+    width_h = h.shape[0]
+    height_h = h.shape[1]
+    g1 = np.zeros((2 * width_g, 2 * height_g))
+    h1 = np.zeros((2 * width_g, 2 * height_g))
+    g1[0:width_g, 0:height_g] = g
+    h1[0:width_h, 0:height_h] = h
+    G = np.fft.fft2(g1)
+    H = np.fft.fft2(h1)
+    p1=np.zeros((2 * width_g, 2 * height_g))
+    p1[0:3,0:3]=p
+    P=np.fft.fft2(p1)
+    gamma=0.
+    F=(np.conjugate(H)/(np.abs(H)**2+gamma*np.abs(P)**2))*G
+    f = np.fft.ifft2(F)
+    f = np.real(f)
+    f = f[0:width_g, 0:height_g]
+    return f
 
+def comp_image(a,b):
+    return np.sum((a-b)**2)
 
 
 def main():
@@ -299,16 +326,17 @@ def main():
     # plt.show()
     print con
     print 'go'
-    filt=inverse_filter(con,h)
+    #filt=inverse_filter(con,h)
     #filt=wiener_filter(con,h, np.array([[1,1],[1,1]]))
+    print 'tickhonov'
+    filt=tickhonov_regularization(con,h)
     bwi=np.zeros((con.shape[0],con.shape[1],3))
     plt.imsave("convolution/res6.jpg", bwi)
     print 'filt'
 
     plt.figure()
     plt.subplot(1, 3, 1)
-
-
+    filt=filt[0:bw.shape[0],0:bw.shape[1]]
 
     plt.imshow(bw, cmap='gray')
     plt.subplot(1, 3, 2)
@@ -317,5 +345,6 @@ def main():
     plt.imshow(filt, cmap='gray')
     plt.show()
     plt.imsave("inverse_filter/res1.jpg", bwi)
+    print 'dif=', comp_image(bw ,con)
 if __name__ == "__main__":
     main()
