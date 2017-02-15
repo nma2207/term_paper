@@ -92,7 +92,7 @@ def laplassian():
 
 def gauss(x,y,sigma):
     twoPi = math.pi * 2
-    return (1/math.sqrt(twoPi)*sigma)*math.exp(-(x*x+y*y)/float(2*sigma*sigma))
+    return (1/(math.sqrt(twoPi)*sigma))*math.exp(-(x*x+y*y)/float(2*sigma*sigma))
 
 def gauss_filter(sigma,n,m):
     #n=3
@@ -310,13 +310,14 @@ def comp_image(a,b):
 
 def main():
 
-    im = plb.imread("lena.bmp")
+    im = plb.imread("GaussianH5x5S20_P1012538.JPG")
 
     bw=make_black_white_im(im)
     print bw
-    h = gauss_filter(5, 11, 11)
+    h = gauss_filter(math.sqrt(20.0),5, 5)
+    #h=np.ones((7,7))*(1./7**2)
     print 'h=',h
-    con = convolution(bw, h, np.array([[0, 0], [0, 0]]))
+    #con = convolution(bw, h, np.array([[0, 0], [0, 0]]))
     print 'con'
     # plt.figure()
     # plt.subplot(1,2,1)
@@ -324,14 +325,14 @@ def main():
     # plt.subplot(1,2,2)
     # plt.imshow(con, cmap='gray')
     # plt.show()
-    print con
+    #print con
     print 'go'
-    #filt=inverse_filter(con,h)
-    #filt=wiener_filter(con,h, np.array([[1,1],[1,1]]))
+    filt=inverse_filter(bw,h)
+#    filt=wiener_filter(bw,h, np.array([[1,1],[1,1]]))
     print 'tickhonov'
-    filt=tickhonov_regularization(con,h)
-    bwi=np.zeros((con.shape[0],con.shape[1],3))
-    plt.imsave("convolution/res6.jpg", bwi)
+    #filt=tickhonov_regularization(con,h)
+    #bwi=np.zeros((con.shape[0],con.shape[1],3))
+    #plt.imsave("convolution/res6.jpg", bwi)
     print 'filt'
 
     plt.figure()
@@ -340,11 +341,15 @@ def main():
 
     plt.imshow(bw, cmap='gray')
     plt.subplot(1, 3, 2)
-    plt.imshow(con, cmap='gray')
+    plt.imshow(im)
     plt.subplot(1, 3, 3)
     plt.imshow(filt, cmap='gray')
     plt.show()
-    plt.imsave("inverse_filter/res1.jpg", bwi)
-    print 'dif=', comp_image(bw ,con)
+    #plt.imsave("inverse_filter/res1.jpg", bwi)
+    origin = plb.imread("P1012538.JPG")
+
+    origin_bw=make_black_white_im(origin)
+    print 'dif_old=',comp_image(origin_bw, bw)
+    print 'dif_new=', comp_image(origin_bw ,filt)
 if __name__ == "__main__":
     main()
