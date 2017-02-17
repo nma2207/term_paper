@@ -92,12 +92,13 @@ def laplassian():
 
 def gauss(x,y,sigma):
     twoPi = math.pi * 2
-    return (1/(math.sqrt(twoPi)*sigma))*math.exp(-(x*x+y*y)/float(2*sigma*sigma))
+    return (1/(twoPi*sigma*sigma))*math.exp(-(x*x+y*y)/float(2*sigma*sigma))
 
 def gauss_filter(sigma,n,m):
     #n=3
     f=np.array([[gauss(i,j,sigma) for j in range (-(m-1)//2, (m+1)//2)] for i in range(-(n-1)//2, (n+1)//2)])
-    f = f / np.sum(f)
+    print 'f sum=', np.sum(f)
+    #f = f / np.sum(f)
     print 'go'
     #image=Image.open("kosmichi.jpg")
     #draw=ImageDraw.Draw(image)
@@ -310,14 +311,14 @@ def comp_image(a,b):
 
 def main():
 
-    im = plb.imread("GaussianH5x5S20_P1012538.JPG")
+    im = plb.imread("P1012538.JPG")
 
     bw=make_black_white_im(im)
     print bw
-    h = gauss_filter(math.sqrt(20.0),5, 5)
+    h = gauss_filter(20 ,5, 5)
     #h=np.ones((7,7))*(1./7**2)
     print 'h=',h
-    #con = convolution(bw, h, np.array([[0, 0], [0, 0]]))
+    con = convolution(bw, h, np.array([[0, 0], [0, 0]]))
     print 'con'
     # plt.figure()
     # plt.subplot(1,2,1)
@@ -327,7 +328,7 @@ def main():
     # plt.show()
     #print con
     print 'go'
-    filt=inverse_filter(bw,h)
+    filt=inverse_filter(con,h)
 #    filt=wiener_filter(bw,h, np.array([[1,1],[1,1]]))
     print 'tickhonov'
     #filt=tickhonov_regularization(con,h)
@@ -336,20 +337,26 @@ def main():
     print 'filt'
 
     plt.figure()
-    plt.subplot(1, 3, 1)
+
     filt=filt[0:bw.shape[0],0:bw.shape[1]]
 
-    plt.imshow(bw, cmap='gray')
-    plt.subplot(1, 3, 2)
-    plt.imshow(im)
-    plt.subplot(1, 3, 3)
+    origin = plb.imread("GaussianH5x5S20_P1012538.JPG")
+
+    origin_bw=make_black_white_im(origin)
+    con = con[1:513, 1:513]
+    plt.subplot(2, 2, 1)
+    plt.imshow(con, cmap='gray')
+    plt.subplot(2, 2, 2)
+    plt.imshow(filt, cmap='gray')
+    plt.subplot(2, 2, 3)
+    plt.imshow(origin_bw, cmap='gray')
+    plt.subplot(2, 2, 4)
+    filt = inverse_filter(bw,h)
     plt.imshow(filt, cmap='gray')
     plt.show()
     #plt.imsave("inverse_filter/res1.jpg", bwi)
-    origin = plb.imread("P1012538.JPG")
 
-    origin_bw=make_black_white_im(origin)
     print 'dif_old=',comp_image(origin_bw, bw)
-    print 'dif_new=', comp_image(origin_bw ,filt)
+    print 'dif_new=', comp_image(con ,origin_bw)
 if __name__ == "__main__":
     main()
