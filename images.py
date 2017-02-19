@@ -16,4 +16,15 @@ def compare_images(a,b):
     return np.sum((a-b)**2)
 
 def compare_images_rgb(a,b):
-    print 'TODO!!!'
+    a_r=a[:,:,0]
+    a_g=a[:,:,1]
+    a_b=a[:,:,2]
+
+    b_r=b[:,:,0]
+    b_g=b[:,:,1]
+    b_b=b[:,:,2]
+
+    return np.array([compare_images(a_r,b_r),
+                     compare_images(a_g, b_g),
+                     compare_images(a_b, b_b)])
+
