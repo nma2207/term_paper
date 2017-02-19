@@ -31,6 +31,8 @@ def gaussian(sigma,n,m):
     f = f / np.sum(f)
     return f
 
+def motion_blur(len, deg):
+    print 'TODO!!!'
 # If I need code below, I'll restore they
 
 # def step_filter(gamma):
