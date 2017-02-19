@@ -51,14 +51,14 @@ def wiener_filter(g, h,k):
     f=f[0:width_g,0:height_g]
     return f
 
-def wiener_filter_rgb(g,h):
+def wiener_filter_rgb(g,h,k=np.zeros((2,2))):
     g_r=g[:,:,0]
     g_g=g[:,:,1]
     g_b=g[:,:,2]
     result=np.zeros(g.shape)
-    result[:, :, 0] =  wiener_filter(g_r, h)
-    result[:, :, 1] =  wiener_filter(g_g, h)
-    result[:, :, 2] =  wiener_filter(g_b, h)
+    result[:, :, 0] =  wiener_filter(g_r, h, k)
+    result[:, :, 1] =  wiener_filter(g_g, h,k)
+    result[:, :, 2] =  wiener_filter(g_b, h,k)
     return result
 
 def tickhonov_regularization(g,h):

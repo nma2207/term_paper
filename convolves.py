@@ -30,9 +30,20 @@ def gaussian(sigma,n,m):
     f=np.array([[gauss(i,j,sigma) for j in range (-(m-1)//2, (m+1)//2)] for i in range(-(n-1)//2, (n+1)//2)])
     f = f / np.sum(f)
     return f
-
-def motion_blur(len, deg):
-    print 'TODO!!!'
+#ang can be only 0, 45 or 90
+def motion_blur(len, ang):
+    result=np.zeros((len+len-1, len+len-1), dtype=float)
+    if(ang==0):
+        for i in range(len-1, len+len-1):
+            result[len-1, i]=1.0
+    elif (ang==45):
+        for i in range(len-1, len+len-1):
+            result[len+len-2-i, i]=1.0
+    elif (ang==90):
+        for i in range(0, len):
+            result[i, len-1]=1.0
+    result/=np.sum(result)
+    return result
 # If I need code below, I'll restore they
 
 # def step_filter(gamma):
