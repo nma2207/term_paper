@@ -19,7 +19,16 @@ def inverse_filter(g,h):
     return f
 
 def inverse_filter_rgb(g,h):
-    print 'TODO!!!'
+    g_r=g[:,:,0]
+    g_g=g[:,:,1]
+    g_b=g[:,:,2]
+    result=np.zeros(g.shape)
+    result[:, :, 0] = inverse_filter(g_r, h)
+    result[:, :, 1] = inverse_filter(g_g, h)
+    result[:, :, 2] = inverse_filter(g_b, h)
+    return result
+
+
 
 def wiener_filter(g, h,k):
     width_g=g.shape[0]
@@ -43,7 +52,14 @@ def wiener_filter(g, h,k):
     return f
 
 def wiener_filter_rgb(g,h):
-    print 'TODO!!!'
+    g_r=g[:,:,0]
+    g_g=g[:,:,1]
+    g_b=g[:,:,2]
+    result=np.zeros(g.shape)
+    result[:, :, 0] =  wiener_filter(g_r, h)
+    result[:, :, 1] =  wiener_filter(g_g, h)
+    result[:, :, 2] =  wiener_filter(g_b, h)
+    return result
 
 def tickhonov_regularization(g,h):
     p=np.array([
@@ -72,4 +88,11 @@ def tickhonov_regularization(g,h):
     return f
 
 def tickhonov_regularization_rgb(g,h):
-    print 'TODO!!!'
+    g_r=g[:,:,0]
+    g_g=g[:,:,1]
+    g_b=g[:,:,2]
+    result=np.zeros(g.shape)
+    result[:, :, 0] = tickhonov_regularization(g_r, h)
+    result[:, :, 1] = tickhonov_regularization(g_g, h)
+    result[:, :, 2] = tickhonov_regularization(g_b, h)
+    return result

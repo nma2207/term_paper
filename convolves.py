@@ -1,10 +1,36 @@
 from scipy import signal as sc_s
+import numpy as np
+import math
 
-def convolution(f,h,n):
+def convolution_and_noise(f,h,n):
     result=sc_s.convolve2d(f,h)
     return result
-def convolution_rgb(f,h,n):
-    print 'TODO!!!'
+
+def convolution_and_noise_rgb(f, h, n):
+
+    f_r=f[:,:,0]
+    f_g=f[:,:,1]
+    f_b=f[:,:,2]
+
+    result0 = convolution_and_noise(f_r, h,n)
+    result1 = convolution_and_noise(f_g, h,n)
+    result2 = convolution_and_noise(f_b, h,n)
+
+    result = np.zeros((result0.shape[0], result0.shape[1],3))
+    result[:, :, 0] = result0
+    result[:, :, 1] = result1
+    result[:, :, 2] = result2
+    return result
+
+def gauss(x,y,sigma):
+    twoPi = math.pi * 2
+    return (1/(twoPi*sigma*sigma))*math.exp(-(x*x+y*y)/float(2*sigma*sigma))
+
+def gaussian(sigma,n,m):
+    f=np.array([[gauss(i,j,sigma) for j in range (-(m-1)//2, (m+1)//2)] for i in range(-(n-1)//2, (n+1)//2)])
+    f = f / np.sum(f)
+    return f
+
 # If I need code below, I'll restore they
 
 # def step_filter(gamma):
@@ -90,31 +116,9 @@ def convolution_rgb(f,h,n):
 #     image.save("laplassian/res2.jpg", "JPEG")
 #     del draw
 #
-# def gauss(x,y,sigma):
-#     twoPi = math.pi * 2
-#     return (1/(twoPi*sigma*sigma))*math.exp(-(x*x+y*y)/float(2*sigma*sigma))
+
 #
-# def gauss_filter(sigma,n,m):
-#     #n=3
-#     f=np.array([[gauss(i,j,sigma) for j in range (-(m-1)//2, (m+1)//2)] for i in range(-(n-1)//2, (n+1)//2)])
-#     #print 'f sum=', np.sum(f)
-#     f = f / np.sum(f)
-#     print 'go'
-#     #image=Image.open("kosmichi.jpg")
-#     #draw=ImageDraw.Draw(image)
-#     #width=image.size[0]
-#    # height=image.size[1]
-#     #pix=image.load()
-#     #for i in range(n/2,width-n/2):
-#      #   for j in range(n/2,height-n/2):
-#      #       r=[0,0,0]
-#      #       for k in range(3):
-#       #          for p in range(-(n-1)//2, (n+1)//2):
-#       #              for q in range (-(n-1)//2, (n+1)//2):
-#      #                   r[k]+=f[n//2+p][q+n//2]*pix[i+p,j+q][k]
-#       #      draw.point((i,j),(int(r[0]),int(r[1]),int(r[2])))
-#     #image.save("gauss_filter/res2.jpg")
-#     return f
+
 #
 # def increase_in_clearness():
 #     f=[[-1,-1,-1],[-1,9,-1],[-1,-1,-1]]
