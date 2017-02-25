@@ -2,19 +2,19 @@ from scipy import signal as sc_s
 import numpy as np
 import math
 
-def convolution_and_noise(f,h,n):
+def convolution(f,h):
     result=sc_s.convolve2d(f,h)
     return result
 
-def convolution_and_noise_rgb(f, h, n):
+def convolution_rgb(f, h):
 
     f_r=f[:,:,0]
     f_g=f[:,:,1]
     f_b=f[:,:,2]
 
-    result0 = convolution_and_noise(f_r, h,n)
-    result1 = convolution_and_noise(f_g, h,n)
-    result2 = convolution_and_noise(f_b, h,n)
+    result0 = convolution(f_r, h)
+    result1 = convolution(f_g, h)
+    result2 = convolution(f_b, h)
 
     result = np.zeros((result0.shape[0], result0.shape[1],3))
     result[:, :, 0] = result0
@@ -30,6 +30,22 @@ def gaussian(sigma,n,m):
     f=np.array([[gauss(i,j,sigma) for j in range (-(m-1)//2, (m+1)//2)] for i in range(-(n-1)//2, (n+1)//2)])
     f = f / np.sum(f)
     return f
+
+def add_normal_noise(f, mean=0, sigma=1):
+    noise = np.random.normal(mean, sigma, (f.shape[0], f.shape[1]))
+    f+=noise
+    for i in range(f.shape[0]):
+        for j in range(f.shape[1]):
+            if(f[i,j]<0):
+                f[i,j]=0.0
+            if(f[i,j]>255):
+                f[i,j]=255.0
+    return noise
+
+def add_normal_noise_rgb(f, mean=0, sigma=1):
+    print 'TODO!!'
+
+
 #ang can be only 0, 45 or 90
 def motion_blur(len, ang):
     result=np.zeros((len+len-1, len+len-1), dtype=float)
@@ -44,6 +60,10 @@ def motion_blur(len, ang):
             result[i, len-1]=1.0
     result/=np.sum(result)
     return result
+
+#Filippov's article
+def quick_blind_deconvolution(g):
+    print 'TODO!!'
 # If I need code below, I'll restore they
 
 # def step_filter(gamma):

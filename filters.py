@@ -45,7 +45,7 @@ def wiener_filter(g, h,k):
     k1[0:k.shape[0],0:k.shape[1]]=k
     K=np.fft.fft2(k1)
     #F=(np.abs(H)**2/(H*((np.abs(H)**2))+K))*G
-    F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2)) )) * G
+    F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2)+K) )) * G
     f=np.fft.ifft2(F)
     f=np.real(f)
     f=f[0:width_g,0:height_g]
@@ -81,7 +81,7 @@ def tickhonov_regularization(g,h):
     p1[0:3,0:3]=p
     P=np.fft.fft2(p1)
     gamma=0.
-    F=(np.conjugate(H)/(np.abs(H)**2+gamma*np.abs(P)**2))*G
+    F =(np.conjugate(H)/(np.abs(H)**2+gamma*np.abs(P)**2))*G
     f = np.fft.ifft2(F)
     f = np.real(f)
     f = f[0:width_g, 0:height_g]
