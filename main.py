@@ -18,11 +18,11 @@ def main():
     h = convolves.gaussian(30, 11, 11)
     #Convolve images
     con=convolves.convolution_rgb(im,h)
-    noise=convolves.add_normal_noise_rgb(im, 0, 5)
+    noise=convolves.add_normal_noise_rgb(con, 0, 30)
 
     #Deblurring
     #filt = filters.inverse_filter_rgb(con, h)
-    filt = filters.inverse_filter_rgb(con, h)
+    filt = filters.wiener_filter_rgb(con, h, noise, im)
     #filt = filters.tickhonov_regularization_rgb(con, h)
 
     #Show images
@@ -31,11 +31,11 @@ def main():
     plt.imshow(im)
     plt.title('original')
     plt.subplot(1, 4, 2)
-    plt.imshow(np.uint8(con))
-    plt.title('gaussian \n sigma=30, 11x11')
+    plt.imshow(np.uint8(images.correct_image_rgb(con)))
+    plt.title('gaussian \n sigma=30, 11x11 \n noise~N(0, 30)')
     plt.subplot(1, 4, 3)
-    plt.imshow(np.uint8(filt))
-    plt.title('inverse filter')
+    plt.imshow(np.uint8(images.correct_image_rgb(filt)))
+    plt.title('wiener filter')
     plt.subplot(1, 4, 4)
     plt.imshow(h, cmap='gray')
     plt.title('PSF')
@@ -47,15 +47,10 @@ def main():
 
     #Saving deblurred images
     plt.imsave("inverse_filter/P1012538_inverse.jpg", np.uint8(filt))
+
 def test():
-    h1=convolves.motion_blur(4, 0)
-    h2=convolves.motion_blur(4,45)
-    h3=convolves.motion_blur(4,90)
-    print 'h1='
-    print h1
-    print 'h2='
-    print h2
-    print 'h3='
-    print h3
+    im = plb.imread("original/P1012538.JPG")
+    images.correct_image(im)
+
 if __name__ == "__main__":
    main()

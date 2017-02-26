@@ -34,16 +34,20 @@ def gaussian(sigma,n,m):
 def add_normal_noise(f, mean=0, sigma=1):
     noise = np.random.normal(mean, sigma, (f.shape[0], f.shape[1]))
     f+=noise
-    for i in range(f.shape[0]):
-        for j in range(f.shape[1]):
-            if(f[i,j]<0):
-                f[i,j]=0.0
-            if(f[i,j]>255):
-                f[i,j]=255.0
     return noise
 
 def add_normal_noise_rgb(f, mean=0, sigma=1):
-    print 'TODO!!'
+    f_r=f[:,:,0]
+    f_g=f[:,:,1]
+    f_b=f[:,:,2]
+    noise_r = add_normal_noise(f_r, mean, sigma)
+    noise_g = add_normal_noise(f_g, mean, sigma)
+    noise_b = add_normal_noise(f_b, mean, sigma)
+    result = np.zeros((noise_r.shape[0], noise_r.shape[1],3))
+    result[:, :, 0] = noise_r
+    result[:, :, 1] = noise_g
+    result[:, :, 2] = noise_b
+    return result
 
 
 #ang can be only 0, 45 or 90

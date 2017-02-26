@@ -28,3 +28,27 @@ def compare_images_rgb(a,b):
                      compare_images(a_g, b_g),
                      compare_images(a_b, b_b)])
 
+def correct_image(im):
+    i=0
+    for i in range(im.shape[0]):
+        for j in range(im.shape[1]):
+            if(im[i,j]<0):
+                im[i,j]=0
+            if(im[i,j]>255):
+                im[i,j]=255
+    return im
+
+def correct_image_rgb(f):
+    f_r=f[:,:,0]
+    f_g=f[:,:,1]
+    f_b=f[:,:,2]
+    res_r=correct_image(f_r)
+    res_g = correct_image(f_g)
+    res_b = correct_image(f_b)
+    result=np.zeros((res_r.shape[0], res_r.shape[1],3))
+    result[: ,:, 0] = res_r
+    result[:, :, 1] = res_g
+    result[:, :, 2] = res_b
+    return result
+
+
