@@ -45,7 +45,7 @@ def wiener_filter(g, h,n, original):
     original1[0:original.shape[0], 0:original.shape[1]] = original
     N=np.fft.fft2(n1)
     ORIGINAL=np.fft.fft2(original1)
-    K=N/ORIGINAL
+    K=(np.abs(N)**2)/(np.abs(ORIGINAL)**2)
     G=np.fft.fft2(g1)
     H=np.fft.fft2(h1)
     F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2)+K) )) * G
