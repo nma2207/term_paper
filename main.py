@@ -49,8 +49,22 @@ def main():
     plt.imsave("inverse_filter/P1012538_inverse.jpg", np.uint8(filt))
 
 def test():
-    im = plb.imread("original/P1012538.JPG")
-    images.correct_image(im)
+    im = plb.imread("original/DSC01761.JPG")
+    h=convolves.motion_blur(50,45)
+    con=convolves.convolution_rgb(im, h)
+
+    plt.figure()
+    plt.subplot(1, 3, 1)
+    plt.imshow(im)
+    plt.title('original')
+    plt.subplot(1, 3, 2)
+    plt.imshow(np.uint8(images.correct_image_rgb(con)))
+    plt.title('Motion bluring\n len=50, ang=45')
+    plt.subplot(1, 3, 3)
+    plt.imshow(h, cmap='gray')
+    plt.title('PSF')
+    plt.show()
+
 
 if __name__ == "__main__":
-   main()
+   test()

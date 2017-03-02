@@ -65,6 +65,22 @@ def motion_blur(len, ang):
     result/=np.sum(result)
     return result
 
+
+def sobel_filter_X():
+    return np.array([[-1,-2,-1],
+                    [0,0,0],
+                    [1,2,1]], dtype=float
+                    )
+def sobel_filter_Y():
+    return np.array([[-1,0,1],
+                     [-2,0,2],
+                     [-1,0,1]], dtype=float)
+
+def averaging_filter(n,m):
+    result=np.ones((n,m), dtype=float)
+    result/=(n*m)
+    return result
+
 #Filippov's article
 def quick_blind_deconvolution(g):
     print 'TODO!!'
