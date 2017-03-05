@@ -1,5 +1,5 @@
 import numpy as np
-
+import convolves as conv
 
 def inverse_filter(g,h):
     width_g=g.shape[0]
@@ -105,3 +105,21 @@ def tickhonov_regularization_rgb(g,h):
     result[:, :, 1] = tickhonov_regularization(g_g, h)
     result[:, :, 2] = tickhonov_regularization(g_b, h)
     return result
+
+
+#Filippov's article
+def quick_blind_deconvolution(g):
+    print 'TODO!!'
+
+
+def lucy_richardson_devonvolution(g,h,n=1): #n - iterations count
+    f=g
+    for i in range(n):
+        k1=conv.convolution(f,h)
+        k1=k1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
+        k2=g/k1
+        k3=conv.convolution(k2,h)
+        k3 = k3[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
+        f=f*k3
+    return f
+

@@ -49,10 +49,11 @@ def main():
     plt.imsave("inverse_filter/P1012538_inverse.jpg", np.uint8(filt))
 
 def test():
-    im = plb.imread("original/DSC01761.JPG")
-    h=convolves.motion_blur(50,45)
+    im = plb.imread("original/P1012538.JPG")
+    h=convolves.motion_blur(10,90)
     con=convolves.convolution_rgb(im, h)
-
+    print con.shape
+    print im.shape
     plt.figure()
     plt.subplot(1, 3, 1)
     plt.imshow(im)
@@ -65,6 +66,28 @@ def test():
     plt.title('PSF')
     plt.show()
 
+def test1():
+    im = plb.imread("original/P1012538.JPG")
+    im_g=np.float64(images.make_gray(im))
+    h=convolves.gaussian(30,11,11)
+    con=convolves.convolution(im_g,h)
+    filt=filters.lucy_richardson_devonvolution(con, h,100)
+    plt.figure()
+    plt.subplot(1,4,1)
+    plt.imshow(im_g, cmap='gray')
+    plt.title('original')
+    plt.subplot(1,4,2)
+    plt.imshow(con, cmap='gray')
+    plt.title('gaussian \n sigma=30 11x11')
+    plt.subplot(1,4,3)
+    plt.imshow(filt, cmap='gray')
+    plt.title('Lucy-Richardson\ndeconvolution\nn=100')
+    plt.subplot(1,4,4)
+    plt.imshow(h,cmap='gray')
+    plt.title('PSF')
+    plt.show()
+
+
 
 if __name__ == "__main__":
-   test()
+   test1()

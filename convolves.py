@@ -81,9 +81,8 @@ def averaging_filter(n,m):
     result/=(n*m)
     return result
 
-#Filippov's article
-def quick_blind_deconvolution(g):
-    print 'TODO!!'
+
+
 # If I need code below, I'll restore they
 
 # def step_filter(gamma):
