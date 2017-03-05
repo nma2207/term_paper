@@ -34,34 +34,38 @@ def gaussian(sigma,n,m):
 def add_normal_noise(f, mean=0, sigma=1):
     noise = np.random.normal(mean, sigma, (f.shape[0], f.shape[1]))
     f+=noise
-    return noise
+    return f,noise
 
 def add_normal_noise_rgb(f, mean=0, sigma=1):
     f_r=f[:,:,0]
     f_g=f[:,:,1]
     f_b=f[:,:,2]
-    noise_r = add_normal_noise(f_r, mean, sigma)
-    noise_g = add_normal_noise(f_g, mean, sigma)
-    noise_b = add_normal_noise(f_b, mean, sigma)
+    f_r,noise_r = add_normal_noise(f_r, mean, sigma)
+    f_g,noise_g = add_normal_noise(f_g, mean, sigma)
+    f_b,noise_b = add_normal_noise(f_b, mean, sigma)
     result = np.zeros((noise_r.shape[0], noise_r.shape[1],3))
     result[:, :, 0] = noise_r
     result[:, :, 1] = noise_g
     result[:, :, 2] = noise_b
-    return result
+    f[:, :, 0] = f_r
+    f[:, :, 1] = f_g
+    f[:, :, 2] = f_b
+
+    return f,result
 
 
 #ang can be only 0, 45 or 90
 def motion_blur(len, ang):
-    result=np.zeros((len+len-1, len+len-1), dtype=float)
+    result=np.zeros((len, len), dtype=float)
     if(ang==0):
-        for i in range(len-1, len+len-1):
-            result[len-1, i]=1.0
+        for i in range(0, len):
+            result[len//2, i]=1.0
     elif (ang==45):
-        for i in range(len-1, len+len-1):
-            result[len+len-2-i, i]=1.0
+        for i in range(0, len):
+            result[len-i-1, i]=1.0
     elif (ang==90):
         for i in range(0, len):
-            result[i, len-1]=1.0
+            result[i, len//2]=1.0
     result/=np.sum(result)
     return result
 

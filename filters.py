@@ -115,6 +115,7 @@ def quick_blind_deconvolution(g):
 def lucy_richardson_devonvolution(g,h,n=1): #n - iterations count
     f=g
     for i in range(n):
+        print float(i)/n*100,'%'
         k1=conv.convolution(f,h)
         k1=k1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
         k2=g/k1
@@ -122,4 +123,20 @@ def lucy_richardson_devonvolution(g,h,n=1): #n - iterations count
         k3 = k3[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
         f=f*k3
     return f
+
+def lucy_richardson_devonvolution_rgb(g, h, n=1):
+    g_r=g[:,:,0]
+    g_g=g[:,:,1]
+    g_b=g[:,:,2]
+    result = np.zeros(g.shape)
+    print 'lucy-richardson deconvolution'
+
+    print 'red'
+    result[:, :, 0] = lucy_richardson_devonvolution(g_r, h,n)
+    print 'green'
+    result[:, :, 1] = lucy_richardson_devonvolution(g_g, h,n)
+    print 'blue'
+    result[:, :, 2] = lucy_richardson_devonvolution(g_b, h,n)
+    return result
+
 
