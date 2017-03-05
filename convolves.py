@@ -85,8 +85,10 @@ def averaging_filter(n,m):
     result/=(n*m)
     return result
 
-
-
+def random_psf(n,m):
+    result=np.random.rand(n,m)
+    result/=np.sum(result)
+    return result
 # If I need code below, I'll restore they
 
 # def step_filter(gamma):

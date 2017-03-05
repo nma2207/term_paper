@@ -67,27 +67,31 @@ def test():
     plt.show()
 
 def test1():
-    im = plb.imread("original/P1012538.JPG")
-    h=convolves.averaging_filter(13,13)
+    im = plb.imread("original/my_bike.jpg")
+    h=convolves.random_psf(15,15)
     im=np.float64(im)
     con=convolves.convolution_rgb(im, h)
-    con, noise=convolves.add_normal_noise_rgb(con, 0, 5)
+    con, noise=convolves.add_normal_noise_rgb(con, 0, 2)
     con=images.correct_image_rgb(con)
-    filt=filters.lucy_richardson_devonvolution_rgb(con, h,100)
+    filt=filters.lucy_richardson_devonvolution_rgb(con, h,10000)
     plt.figure()
     plt.subplot(1,4,1)
     plt.imshow(np.uint8(im))
     plt.title('original')
     plt.subplot(1,4,2)
     plt.imshow(np.uint8(con))
-    plt.title('average bluring\n13x13\nnoise~N(0,5)')
+    plt.title('Random blur\n15x15\nnoise~N(0,2)')
     plt.subplot(1,4,3)
     plt.imshow(np.uint8(images.correct_image_rgb(filt)))
-    plt.title('Lucy-Richardson\ndeconvolution\nn=100')
+    plt.title('Lucy-Richardson\ndeconvolution\neps=10000')
     plt.subplot(1,4,4)
     plt.imshow(h,cmap='gray')
     plt.title('PSF')
     plt.show()
+
+def test2():
+    h=convolves.gaussian(5,3,3)
+    print h
 
 
 

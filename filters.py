@@ -1,5 +1,6 @@
 import numpy as np
 import convolves as conv
+import images
 
 def inverse_filter(g,h):
     width_g=g.shape[0]
@@ -112,19 +113,24 @@ def quick_blind_deconvolution(g):
     print 'TODO!!'
 
 
-def lucy_richardson_devonvolution(g,h,n=1): #n - iterations count
+def lucy_richardson_devonvolution(g,h,eps): #n - iterations count
     f=g
-    for i in range(n):
-        print float(i)/n*100,'%'
+    f_prev=np.zeros(f.shape, dtype=float)
+    k=images.compare_images(f_prev, f)
+    while(k>eps):
+        print k
+        f_prev=np.copy(f)
+        #print float(i)/n*100,'%'
         k1=conv.convolution(f,h)
         k1=k1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
         k2=g/k1
         k3=conv.convolution(k2,h)
         k3 = k3[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
         f=f*k3
+        k=images.compare_images(f_prev, f)
     return f
 
-def lucy_richardson_devonvolution_rgb(g, h, n=1):
+def lucy_richardson_devonvolution_rgb(g, h, eps):
     g_r=g[:,:,0]
     g_g=g[:,:,1]
     g_b=g[:,:,2]
@@ -132,11 +138,11 @@ def lucy_richardson_devonvolution_rgb(g, h, n=1):
     print 'lucy-richardson deconvolution'
 
     print 'red'
-    result[:, :, 0] = lucy_richardson_devonvolution(g_r, h,n)
+    result[:, :, 0] = lucy_richardson_devonvolution(g_r, h,eps)
     print 'green'
-    result[:, :, 1] = lucy_richardson_devonvolution(g_g, h,n)
+    result[:, :, 1] = lucy_richardson_devonvolution(g_g, h,eps)
     print 'blue'
-    result[:, :, 2] = lucy_richardson_devonvolution(g_b, h,n)
+    result[:, :, 2] = lucy_richardson_devonvolution(g_b, h,eps)
     return result
 
 
