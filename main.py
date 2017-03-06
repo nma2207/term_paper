@@ -69,41 +69,31 @@ def test():
 
 def test1():
     im = plb.imread("original/my_bike.jpg")
-    h=np.array([[0,	0,	0,	0,	0,	0,	0,	0.0145111444211340,	0],
-[0,	0	,0,	0,	0,	0,	0.0262386817413083,	0.0895844630599660	,0.0145111444211341],
-[0,	0,	0,	0	,0	,0.0262386817413083	,0.0895844630599660,	0.0262386817413083	,0],
-[0,	0,	0,	0	,0.0262386817413083	,0.0895844630599660,	0.0262386817413083	,0,	0],
-[0,	0,	0,	0.0262386817413083	,0.0895844630599661,	0.0262386817413083,	0	,0,	0],
-[0,	0,	0.0262386817413083,	0.0895844630599660	,0.0262386817413083,	0	,0,	0,	0],
-[0,	0.0262386817413083,	0.0895844630599660	,0.0262386817413083,	0,	0,	0,	0,	0],
-[0.0145111444211341,	0.0895844630599660,	0.0262386817413083,	0,	0,	0,	0,	0,	0],
-[0,	0.0145111444211340,	0	,0	,0,	0,	0,	0,	0]])
-    print h.shape
+    h=convolves.motion_blur(20,30)
     im=np.float64(im)
     con=convolves.convolution_rgb(im, h)
     con, noise=convolves.add_normal_noise_rgb(con, 0, 2)
     con=images.correct_image_rgb(con)
-    filt=filters.lucy_richardson_devonvolution_rgb(con, h,1000)
+    filt=filters.lucy_richardson_devonvolution_rgb(con, h,500)
     plt.figure()
     plt.subplot(1,4,1)
     plt.imshow(np.uint8(im))
     plt.title('original')
     plt.subplot(1,4,2)
     plt.imshow(np.uint8(con))
-    plt.title('Random blur\n15x15\nnoise~N(0,2)')
+    plt.title('Motion blur\nlen=20 angle=30\nnoise~N(0,2)')
     plt.subplot(1,4,3)
     plt.imshow(np.uint8(images.correct_image_rgb(filt)))
-    plt.title('Lucy-Richardson\ndeconvolution\neps=10000')
+    plt.title('Lucy-Richardson\ndeconvolution\neps=500')
     plt.subplot(1,4,4)
     plt.imshow(h,cmap='gray')
     plt.title('PSF')
     plt.show()
 
-def test2():
-    h=convolves.gaussian(5,3,3)
-    print h
+
 
 def test2():
-    print 'sa'
+    h=convolves.motion_blur(10,30)
+    print h
 if __name__ == "__main__":
-   test2()
+   test1()
