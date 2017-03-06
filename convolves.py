@@ -55,20 +55,42 @@ def add_normal_noise_rgb(f, mean=0, sigma=1):
 
 
 #ang can be only 0, 45 or 90
-def motion_blur(len, ang):
-    result=np.zeros((len, len), dtype=float)
-    if(ang==0):
-        for i in range(0, len):
-            result[len//2, i]=1.0
-    elif (ang==45):
-        for i in range(0, len):
-            result[len-i-1, i]=1.0
-    elif (ang==90):
-        for i in range(0, len):
-            result[i, len//2]=1.0
-    result/=np.sum(result)
-    return result
+# def motion_blur(len, ang):
+#     result=np.zeros((len, len), dtype=float)
+#     if(ang==0):
+#         for i in range(0, len):
+#             result[len//2, i]=1.0
+#     elif (ang==45):
+#         for i in range(0, len):
+#             result[len-i-1, i]=1.0
+#     elif (ang==90):
+#         for i in range(0, len):
+#             result[i, len//2]=1.0
+#     result/=np.sum(result)
+#     return result
 
+def motion_blur(len, ang):
+    eps=2.220446049250313e-016
+    len=max(1, len)
+    half=(len-1)/2
+    phi=(ang%180)/180.*math.pi
+    cosphi=math.cos(phi)
+    sinphi=math.sin(phi)
+    xsign=np.sign(cosphi)
+    linewdth=1
+    sx=int(half*cosphi+linewdth*xsign-len*eps)
+    sy=int(half*sinphi+linewdth-len*eps)
+    xx=np.arange(0,sx+xsign, xsign)
+    yy=np.arange(0, sy+1)
+    x,y=np.meshgrid(xx,yy)
+    dist2line=(y*cosphi-x*sinphi)
+    rad=math.sqrt(x*x+y*y)
+    indexs1=np.where(rad>=half)
+    indexs2=np.where(np.fabs(dist2line)<=linewdth)
+    indexs1=np.array(indexs1)
+    indexs1=indexs1.transpose()
+    indexs2=np.array(indexs2)
+    indexs2=indexs2.transpose()
 
 def sobel_filter_X():
     return np.array([[-1,-2,-1],

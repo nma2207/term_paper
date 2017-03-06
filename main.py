@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import images
 import convolves
 import filters
+import math
 
 
 
@@ -68,12 +69,21 @@ def test():
 
 def test1():
     im = plb.imread("original/my_bike.jpg")
-    h=convolves.random_psf(15,15)
+    h=np.array([[0,	0,	0,	0,	0,	0,	0,	0.0145111444211340,	0],
+[0,	0	,0,	0,	0,	0,	0.0262386817413083,	0.0895844630599660	,0.0145111444211341],
+[0,	0,	0,	0	,0	,0.0262386817413083	,0.0895844630599660,	0.0262386817413083	,0],
+[0,	0,	0,	0	,0.0262386817413083	,0.0895844630599660,	0.0262386817413083	,0,	0],
+[0,	0,	0,	0.0262386817413083	,0.0895844630599661,	0.0262386817413083,	0	,0,	0],
+[0,	0,	0.0262386817413083,	0.0895844630599660	,0.0262386817413083,	0	,0,	0,	0],
+[0,	0.0262386817413083,	0.0895844630599660	,0.0262386817413083,	0,	0,	0,	0,	0],
+[0.0145111444211341,	0.0895844630599660,	0.0262386817413083,	0,	0,	0,	0,	0,	0],
+[0,	0.0145111444211340,	0	,0	,0,	0,	0,	0,	0]])
+    print h.shape
     im=np.float64(im)
     con=convolves.convolution_rgb(im, h)
     con, noise=convolves.add_normal_noise_rgb(con, 0, 2)
     con=images.correct_image_rgb(con)
-    filt=filters.lucy_richardson_devonvolution_rgb(con, h,10000)
+    filt=filters.lucy_richardson_devonvolution_rgb(con, h,1000)
     plt.figure()
     plt.subplot(1,4,1)
     plt.imshow(np.uint8(im))
@@ -93,7 +103,7 @@ def test2():
     h=convolves.gaussian(5,3,3)
     print h
 
-
-
+def test2():
+    print 'sa'
 if __name__ == "__main__":
-   test1()
+   test2()
