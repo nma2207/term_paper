@@ -5,7 +5,9 @@ import images
 import convolves
 import filters
 import math
-
+import threading
+import time
+from multiprocessing import Pool
 
 
 
@@ -90,10 +92,28 @@ def test1():
     plt.title('PSF')
     plt.show()
 
-
+def sum(x):
+    return np.sum(np.arange(x+1))
 
 def test2():
-    h=convolves.motion_blur(10,30)
-    print h
+    valies=[200,300]
+    pool=Pool()
+    pool.map(sum, valies)
+    pool.close()
+    pool.join()
+
+def test3():
+    sum(200)
+    sum(300)
+
 if __name__ == "__main__":
-   test1()
+    start1=time.time()
+    for i in range(100):
+        test2()
+    end1=time.time()
+    start2=time.time()
+    for i in range(100):
+        test3()
+    end2=time.time()
+    print (end1-start1)/100.
+    print (end2-start2)/100.
