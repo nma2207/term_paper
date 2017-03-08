@@ -8,6 +8,7 @@ import math
 import threading
 import time
 from multiprocessing import Pool
+from multiprocessing import Process
 
 
 
@@ -93,27 +94,47 @@ def test1():
     plt.show()
 
 def sum(x):
-    return np.sum(np.arange(x+1))
+    for i in range(100):
+        a1=np.random.rand(x,x)
+        a2=np.random.rand(x,x)
+        a1*a2
+
+    #print a1*a2
 
 def test2():
-    valies=[200,300]
+    values=[2000,2500,3000]
     pool=Pool()
-    pool.map(sum, valies)
+    pool.map(sum, values)
     pool.close()
     pool.join()
 
+    # p1 = Process(target=sum, args=(2000,))
+    # p2 = Process(target=sum, args=(2500,))
+    # p3 = Process(target=sum, args=(3000,))
+    # p1.start()
+    # p2.start()
+    # p3.start()
+    # p1.join()
+    # p2.join()
+    # p3.join()
+
+
 def test3():
-    sum(200)
-    sum(300)
+    sum(2000)
+    sum(2500)
+    sum(3000)
+
 
 if __name__ == "__main__":
     start1=time.time()
-    for i in range(100):
+    for i in range(10):
+        print i," 1"
         test2()
     end1=time.time()
     start2=time.time()
-    for i in range(100):
+    for i in range(10):
+        print i," 2"
         test3()
     end2=time.time()
-    print (end1-start1)/100.
-    print (end2-start2)/100.
+    print (end1-start1)/10.
+    print (end2-start2)/10.
