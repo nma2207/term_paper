@@ -1,3 +1,4 @@
+# coding=utf-8
 import numpy as np
 import matplotlib.pylab as plb
 import matplotlib.pyplot as plt
@@ -94,7 +95,7 @@ def test1():
     plt.show()
 
 def sum(x):
-    for i in range(100):
+    for i in range(10):
         a1=np.random.rand(x,x)
         a2=np.random.rand(x,x)
         a1*a2
@@ -102,6 +103,7 @@ def sum(x):
     #print a1*a2
 
 def test2():
+    #русские комментарии
     values=[2000,2500,3000]
     pool=Pool()
     pool.map(sum, values)
@@ -127,14 +129,14 @@ def test3():
 
 if __name__ == "__main__":
     start1=time.time()
-    for i in range(10):
+    for i in range(1):
         print i," 1"
         test2()
     end1=time.time()
     start2=time.time()
-    for i in range(10):
+    for i in range(1):
         print i," 2"
         test3()
     end2=time.time()
-    print (end1-start1)/10.
-    print (end2-start2)/10.
+    print 'multi-thread: ',(end1-start1)/1.
+    print 'posledovatelno: ',(end2-start2)/1.
