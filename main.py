@@ -8,6 +8,7 @@ import filters
 import math
 import threading
 import time
+import multiprocessing as mp
 from multiprocessing import Pool
 from multiprocessing import Process
 
@@ -20,7 +21,7 @@ def main():
     im = plb.imread("original/P1012538.JPG")
 
     #Computing PSF
-    h = convolves.gaussian(30, 11, 11)
+    h = convolves.motion_blur(10,30)
     #Convolve images
     con=convolves.convolution_rgb(im,h)
     noise=convolves.add_normal_noise_rgb(con, 0, 30)
@@ -55,10 +56,8 @@ def main():
 
 def test():
     im = plb.imread("original/P1012538.JPG")
-    h=convolves.motion_blur(10,90)
+    h=convolves.motion_blur(10,30)
     con=convolves.convolution_rgb(im, h)
-    print con.shape
-    print im.shape
     plt.figure()
     plt.subplot(1, 3, 1)
     plt.imshow(im)
@@ -78,7 +77,7 @@ def test1():
     con=convolves.convolution_rgb(im, h)
     con, noise=convolves.add_normal_noise_rgb(con, 0, 2)
     con=images.correct_image_rgb(con)
-    filt=filters.lucy_richardson_devonvolution_rgb(con, h,500)
+    filt=filters.lucy_ricardson_deconvolution_multythread(con, h,100)
     plt.figure()
     plt.subplot(1,4,1)
     plt.imshow(np.uint8(im))
@@ -88,27 +87,30 @@ def test1():
     plt.title('Motion blur\nlen=20 angle=30\nnoise~N(0,2)')
     plt.subplot(1,4,3)
     plt.imshow(np.uint8(images.correct_image_rgb(filt)))
-    plt.title('Lucy-Richardson\ndeconvolution\neps=500')
+    plt.title('Lucy-Richardson\ndeconvolution\neps=50')
     plt.subplot(1,4,4)
     plt.imshow(h,cmap='gray')
     plt.title('PSF')
     plt.show()
 
-def sum(x):
+def sum(x,y):
     for i in range(10):
-        a1=np.random.rand(x,x)
-        a2=np.random.rand(x,x)
+        a1=np.random.rand(x,y)
+        a2=np.random.rand(x,y)
         a1*a2
+    return x
 
     #print a1*a2
-
+def temp(t):
+    return sum(*t)
 def test2():
     #русские комментарии
-    values=[2000,2500,3000]
-    pool=Pool()
-    pool.map(sum, values)
-    pool.close()
-    pool.join()
+    values=[(2000,1500),(2500,2000),(3000,3500)]
+    pool=Pool(processes=mp.cpu_count())
+    result=pool.map(temp, values)
+    print result
+    # pool.close()
+    # pool.join()
 
     # p1 = Process(target=sum, args=(2000,))
     # p2 = Process(target=sum, args=(2500,))
@@ -122,21 +124,22 @@ def test2():
 
 
 def test3():
-    sum(2000)
-    sum(2500)
-    sum(3000)
+    sum(2000,200)
+    sum(2500,200)
+    sum(3000,200)
 
 
 if __name__ == "__main__":
-    start1=time.time()
-    for i in range(1):
-        print i," 1"
-        test2()
-    end1=time.time()
-    start2=time.time()
-    for i in range(1):
-        print i," 2"
-        test3()
-    end2=time.time()
-    print 'multi-thread: ',(end1-start1)/1.
-    print 'posledovatelno: ',(end2-start2)/1.
+    test1()
+    # start1=time.time()
+    # for i in range(1):
+    #     print i," 1"
+    #     test2()
+    # end1=time.time()
+    # start2=time.time()
+    # for i in range(1):
+    #     print i," 2"
+    #     test3()
+    # end2=time.time()
+    # print 'multi-thread: ',(end1-start1)/1.
+    # print 'posledovatelno: ',(end2-start2)/1.

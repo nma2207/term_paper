@@ -1,6 +1,9 @@
 import numpy as np
 import convolves as conv
 import images
+import multiprocessing as mp
+from multiprocessing import Pool
+
 
 def inverse_filter(g,h):
     width_g=g.shape[0]
@@ -118,13 +121,13 @@ def lucy_richardson_devonvolution(g,h,eps): #n - iterations count
     f_prev=np.zeros(f.shape, dtype=float)
     k=images.compare_images(f_prev, f)
     while(k>eps):
-        print k
         f_prev=np.copy(f)
         #print float(i)/n*100,'%'
         k1=conv.convolution(f,h)
         k1=k1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
         k2=g/k1
-        k3=conv.convolution(k2,h)
+        h1=np.flipud(np.fliplr(h))
+        k3=conv.convolution(k2,h1)
         k3 = k3[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
         f=f*k3
         k=images.compare_images(f_prev, f)
@@ -144,5 +147,26 @@ def lucy_richardson_devonvolution_rgb(g, h, eps):
     print 'blue'
     result[:, :, 2] = lucy_richardson_devonvolution(g_b, h,eps)
     return result
+
+def temp(t):
+    return lucy_richardson_devonvolution(*t)
+
+
+
+def lucy_ricardson_deconvolution_multythread(g,h,eps):
+    pool=Pool(processes=mp.cpu_count())
+    g_r=g[:,:,0]
+    g_g=g[:,:,1]
+    g_b=g[:,:,2]
+    values=[(g_r, h, eps),
+            (g_g, h, eps),
+            (g_b, h, eps)]
+    temp_result=pool.map(temp, values)
+    result = np.zeros(g.shape)
+    result[:, :, 0]=temp_result[0]
+    result[:, :, 1]=temp_result[1]
+    result[:, :, 2]=temp_result[2]
+    return result
+
 
 
