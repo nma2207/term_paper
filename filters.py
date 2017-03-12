@@ -121,6 +121,7 @@ def lucy_richardson_devonvolution(g,h,eps): #n - iterations count
     f_prev=np.zeros(f.shape, dtype=float)
     k=images.compare_images(f_prev, f)
     while(k>eps):
+        print k
         f_prev=np.copy(f)
         #print float(i)/n*100,'%'
         k1=conv.convolution(f,h)
@@ -153,7 +154,7 @@ def temp(t):
 
 
 
-def lucy_ricardson_deconvolution_multythread(g,h,eps):
+def lucy_richardson_deconvolution_multythread(g,h,eps):
     pool=Pool(processes=mp.cpu_count())
     g_r=g[:,:,0]
     g_g=g[:,:,1]

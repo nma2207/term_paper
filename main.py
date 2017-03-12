@@ -77,7 +77,7 @@ def test1():
     con=convolves.convolution_rgb(im, h)
     con, noise=convolves.add_normal_noise_rgb(con, 0, 2)
     con=images.correct_image_rgb(con)
-    filt=filters.lucy_ricardson_deconvolution_multythread(con, h,100)
+    filt=filters.lucy_richardson_deconvolution_multythread(con, h,100)
     plt.figure()
     plt.subplot(1,4,1)
     plt.imshow(np.uint8(im))
@@ -128,9 +128,28 @@ def test3():
     sum(2500,200)
     sum(3000,200)
 
+def test_kosmichi():
+    im = plb.imread("original/kosmichi.jpg")
+    im = np.float64(im)
+    h=convolves.motion_blur(20,100)
+    filt=filters.lucy_richardson_devonvolution_rgb(im, h, 10000000)
+    plt.figure()
+    plt.subplot(1,3,1)
+    plt.imshow(np.uint8(im))
+    plt.title('original')
+    plt.subplot(1,3,2)
+    plt.imshow(np.uint8(images.correct_image_rgb(filt)))
+    plt.title('Lucy-Richardson\ndeconvolution\neps=10000')
+    plt.subplot(1,3,3)
+    plt.imshow(h,cmap='gray')
+    plt.title('PSF')
+    plt.show()
+
+
+
 
 if __name__ == "__main__":
-    test1()
+    test_kosmichi()
     # start1=time.time()
     # for i in range(1):
     #     print i," 1"
