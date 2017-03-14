@@ -11,6 +11,7 @@ import time
 import multiprocessing as mp
 from multiprocessing import Pool
 from multiprocessing import Process
+import matplotlib.mlab as mlab
 
 
 
@@ -128,28 +129,45 @@ def test3():
     sum(2500,200)
     sum(3000,200)
 
-def test_kosmichi():
-    im = plb.imread("original/kosmichi.jpg")
-    im = np.float64(im)
-    h=convolves.motion_blur(20,100)
-    filt=filters.lucy_richardson_devonvolution_rgb(im, h, 10000000)
+
+
+def test4():
+    #начитавшись статей Южикова решил попробовать вычислять градиент
+    #при помощи фильтра Собеля, т.к. вы говорили что эта штука дает карту ГРАДИЕНТОВ
+
+    #Гистограмму считает оочень долго, поэтому не советую запускать
+
+    im=plb.imread("original/gray_lena.jpg")
+    im=images.make_gray(im)
+    im=np.float64(im)
+    h_x=convolves.sobel_filter_X()
+    h_y=convolves.sobel_filter_Y()
+    im_x=convolves.convolution(im,h_x)
+    im_y=convolves.convolution(im, h_y)
+    h=convolves.gaussian(10,51,51)
+    con=convolves.convolution(im, h)
+    con_x=convolves.convolution(con, h_x)
     plt.figure()
-    plt.subplot(1,3,1)
-    plt.imshow(np.uint8(im))
-    plt.title('original')
-    plt.subplot(1,3,2)
-    plt.imshow(np.uint8(images.correct_image_rgb(filt)))
-    plt.title('Lucy-Richardson\ndeconvolution\neps=10000')
-    plt.subplot(1,3,3)
-    plt.imshow(h,cmap='gray')
-    plt.title('PSF')
+    plt.subplot(1, 2, 1)
+    plt.imshow(im_x, cmap='gray')
+    plt.subplot(1, 2, 2)
+    plt.imshow(con_x, cmap='gray')
+    plt.show()
+    plt.figure(1)
+    print 'suchka'
+    n1, bins1, patches1 = plt.hist(im_x, 25, normed=1, facecolor='green', alpha=0.75)
+    n2, bins2, patches2 = plt.hist(con_x, 25, normed=1, facecolor='green', alpha=0.75)
+    print bins1.shape
+    y1 = mlab.normpdf(bins1, 0, 200)
+    y2 = mlab.normpdf(bins2, 0, 200)
+    plt.show()
+    plt.figure(2)
+    plt.plot(bins1, y1, 'r')
+    plt.plot(bins2, y2, 'b')
     plt.show()
 
-
-
-
 if __name__ == "__main__":
-    test_kosmichi()
+    test4()
     # start1=time.time()
     # for i in range(1):
     #     print i," 1"
