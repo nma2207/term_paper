@@ -170,38 +170,22 @@ def lucy_richardson_deconvolution_multythread(g,h,eps):
     result[:, :, 2]=temp_result[2]
     return result
 
-def lucy_richardson_blind_deconvolution(g, eps):
+def lucy_richardson_blind_deconvolution(g, n, m):
     #init h
-    h=conv.gaussian(1,3,3)
+    h=(1./np.sum(g)**2)*conv.correlation2(g,g)
     f=np.copy(g)
-    f_prev=np.zeros(f.shape, dtype=float)
-    k=images.compare_images(f_prev, f)
-    while(k>eps):
-        print k
-        f_prev=np.copy(f)
-        inv_f=np.flipud(np.fliplr(f))
-        new_h=conv.convolution(f,h)
-        new_h=new_h[0:g.shape[0],0:g.shape[1]]
-        new_h=g/new_h
-        new_h=new_h[0:h.shape[0], 0:h.shape[1]]
-        new_h=conv.convolution( inv_f,new_h)
-        new_h=new_h[0:h.shape[0], 0:h.shape[1]]
-        new_h*=h
-        h=np.copy(new_h)
-        h/=np.sum(h)
-        inv_h=np.fliplr(np.flipud(h))
-        k1=conv.convolution(f,h)
-        k1=k1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
-        k2=g/k1
-        h1=np.flipud(np.fliplr(h))
-        k3=conv.convolution(k2,h1)
-        k3 = k3[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
-        f=f*k3
-        new_h=np.zeros((h.shape[0]+2, h.shape[1]+2))
-        new_h[1:1+h.shape[0], 1:1+h.shape[1]]=h
-        h=new_h
-        plt.figure()
-        plt.imshow(h, cmap='gray')
-        plt.show()
-        k=images.compare_images(f_prev, f)
-    return f
+    print 'blind l-r'
+    for i in range(n):
+        print (float(i)/n)*100, ' %'
+        #print 'h:'
+        for k in range(m):
+            #print '--', float(k)/m*100, '%'
+            p=g/(conv.convolution2(h,f))
+            h=(1./np.sum(f))*(h*conv.correlation2(f,p))
+        #print 'f:'
+        for k in range(m):
+            #print '--', float(k) / m * 100, '%'
+            p=g/(conv.convolution2(f,h))
+            f=(1./np.sum(h))*(f*conv.correlation2(p,h))
+
+    return f,h
