@@ -12,6 +12,7 @@ import multiprocessing as mp
 from multiprocessing import Pool
 from multiprocessing import Process
 import matplotlib.mlab as mlab
+import scipy.signal as sg
 
 
 
@@ -73,7 +74,7 @@ def test():
 
 def test1():
     im = plb.imread("original/DSC02125.JPG")
-    h=convolves.motion_blur(20,30)
+    h=convolves.gaussian(1,512,512)
     im=np.float64(im)
     con=convolves.convolution_rgb(im, h)
     con, noise=convolves.add_normal_noise_rgb(con, 0, 2)
@@ -184,20 +185,27 @@ def test4():
     # plt.plot(bins1, y1, 'r')
     # plt.plot(bins2, y2, 'b')
     # plt.show()
-def test_blind():
+def test_l_r():
     im=plt.imread('original/lena.bmp')
-    gray=images.make_gray(im)
-    gray=np.float64(gray)
-    h=convolves.gaussian(15,35,35)
-    con=convolves.convolution(gray, h)
-    filt=filters.lucy_richardson_blind_deconvolution(con, 5000)
+    #gray=images.make_gray(im)
+    #gray=np.float64(gray)
+    im=np.float64(im)
+    h=convolves.gaussian(5,35,35)
+    print 'go con'
+    con=convolves.convolution_rgb(im, h)
+    con,noise=convolves.add_normal_noise_rgb(con, 0, 5)
+    print 'go filt'
+    filt=filters.lucy_richardson_deconvolution_multythread(con,h, 20000)
+    con=np.uint8(images.correct_image_rgb(con))
+    #con=convolves.add_normal_noise_rgb()
+    filt=np.uint8(images.correct_image_rgb(filt))
     plt.figure()
     plt.subplot(1,4,1)
-    plt.imshow(gray, cmap='gray')
+    plt.imshow(np.uint8(im))
     plt.subplot(1,4,2)
-    plt.imshow(con, cmap='gray')
+    plt.imshow(con)
     plt.subplot(1,4,3)
-    plt.imshow(filt, cmap='gray')
+    plt.imshow(filt)
     plt.subplot(1,4,4)
     plt.imshow(h, cmap='gray')
     plt.show()
@@ -207,9 +215,11 @@ def test_corr():
     im=plt.imread('original/lena.bmp')
     gray=images.make_gray(im)
     gray=np.float64(gray)
-    h=convolves.gaussian(1,512,512)
+    h=convolves.gaussian(13,41,41)
     con=convolves.convolution2(gray, h)
-    cor=convolves.correlation2(gray, h)
+    cor=convolves.correlation2(gray,h)
+    #con=sg.convolve2d(gray, h)
+    #cor=sg.correlate2d(gray, h)
     plt.figure()
     plt.subplot(1,4,1)
     plt.imshow(gray, cmap='gray')
@@ -224,12 +234,12 @@ def test_corr():
     plt.imshow(h, cmap='gray')
     plt.title('PSF\ngaussian\nsigma=1, 512x512')
     plt.show()
-
+    print images.compare_images(con, cor)
 
 
 
 if __name__ == "__main__":
-    test_corr()
+    test_l_r()
     # start1=time.time()
     # for i in range(1):
     #     print i," 1"

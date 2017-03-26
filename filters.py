@@ -120,21 +120,22 @@ def lucy_richardson_devonvolution(g,h,eps): #n - iterations count
     f=g
     f_prev=np.zeros(f.shape, dtype=float)
     k=images.compare_images(f_prev, f)
+
     while(k>eps):
 
         f_prev=np.copy(f)
-        #print float(i)/n*100,'%'
-        k1=conv.convolution(f,h)
-        k1=k1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
+        #print k
+        k1=conv.convolution2(f,h)
+        #k1=k1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
         k2=g/k1
         h1=np.flipud(np.fliplr(h))
-        k3=conv.convolution(k2,h1)
-        k3 = k3[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
+        k3=conv.convolution2(k2,h1)
+        #k3 = k3[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
         f=f*k3
         k=images.compare_images(f_prev, f)
     return f
 
-def lucy_richardson_devonvolution_rgb(g, h, eps):
+def lucy_richardson_deconvolution_rgb(g, h, eps):
     g_r=g[:,:,0]
     g_g=g[:,:,1]
     g_b=g[:,:,2]

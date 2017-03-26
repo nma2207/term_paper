@@ -1,3 +1,4 @@
+# coding=utf-8
 from scipy import signal as sc_s
 import numpy as np
 import math
@@ -19,7 +20,8 @@ def convolution2(f,h):
     g1=np.fft.ifft2(G)
     g1=np.real(g1)
     g=g1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
-    return g1
+
+    return g
 
 def correlation2(f,h):
     height=f.shape[0]*2
@@ -36,8 +38,17 @@ def correlation2(f,h):
     G=np.conjugate(G)
     g1=np.fft.ifft2(G)
     g1=np.real(g1)
-    g = g1[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
-    return g1
+    g=np.zeros((f.shape[0], f.shape[1]), dtype=float)
+    #правый нижний угол
+    g[:h.shape[0]//2, :h.shape[1]//2]=g1[g1.shape[0]-h.shape[0]//2:g1.shape[0], g1.shape[1]-h.shape[1]//2:g1.shape[1]]
+    #левый верхний
+    g[h.shape[0]//2:g.shape[0],  h.shape[1]//2:g.shape[1]]=g1[:f.shape[0]-h.shape[0]//2, :f.shape[1]-h.shape[1]//2]
+    #левый нижний верхний
+    g[h.shape[0]//2:g.shape[0], :h.shape[1]//2]=g1[:f.shape[0]-h.shape[0]//2, g1.shape[1]-h.shape[1]//2:g1.shape[1]]
+    #праывй верхний
+    g[:h.shape[0]//2, h.shape[1]//2:g.shape[1]] = g1[g1.shape[0]-h.shape[0]//2:g1.shape[0], :f.shape[1]-h.shape[1]//2]
+    #g = g1[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
+    return g
 
 def convolution_rgb(f, h):
 
@@ -45,9 +56,9 @@ def convolution_rgb(f, h):
     f_g=f[:,:,1]
     f_b=f[:,:,2]
 
-    result0 = convolution(f_r, h)
-    result1 = convolution(f_g, h)
-    result2 = convolution(f_b, h)
+    result0 = convolution2(f_r, h)
+    result1 = convolution2(f_g, h)
+    result2 = convolution2(f_b, h)
 
     result = np.zeros((result0.shape[0], result0.shape[1],3))
     result[:, :, 0] = result0
