@@ -188,7 +188,7 @@ def test_blind():
     im=plt.imread('original/lena.bmp')
     gray=images.make_gray(im)
     gray=np.float64(gray)
-    h=convolves.gaussian(4,35,35)
+    h=convolves.gaussian(15,35,35)
     con=convolves.convolution(gray, h)
     filt=filters.lucy_richardson_blind_deconvolution(con, 5000)
     plt.figure()
@@ -202,8 +202,34 @@ def test_blind():
     plt.imshow(h, cmap='gray')
     plt.show()
 
+
+def test_corr():
+    im=plt.imread('original/lena.bmp')
+    gray=images.make_gray(im)
+    gray=np.float64(gray)
+    h=convolves.gaussian(1,512,512)
+    con=convolves.convolution2(gray, h)
+    cor=convolves.correlation2(gray, h)
+    plt.figure()
+    plt.subplot(1,4,1)
+    plt.imshow(gray, cmap='gray')
+    plt.title('Original')
+    plt.subplot(1,4,2)
+    plt.imshow(images.correct_image(con), cmap='gray')
+    plt.title('Convoluton')
+    plt.subplot(1,4,3)
+    plt.imshow(images.correct_image(cor), cmap='gray')
+    plt.title('Correlation')
+    plt.subplot(1,4,4)
+    plt.imshow(h, cmap='gray')
+    plt.title('PSF\ngaussian\nsigma=1, 512x512')
+    plt.show()
+
+
+
+
 if __name__ == "__main__":
-    test_blind()
+    test_corr()
     # start1=time.time()
     # for i in range(1):
     #     print i," 1"

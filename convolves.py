@@ -6,6 +6,39 @@ def convolution(f,h):
     result=sc_s.convolve2d(f,h)
     return result
 
+def convolution2(f,h):
+    height=f.shape[0]*2
+    width=f.shape[1]*2
+    f1=np.zeros((height,width))
+    h1=np.zeros((height,width))
+    f1[0:f.shape[0], 0:f.shape[1]]=f
+    h1[0:h.shape[0], 0:h.shape[1]] = h
+    F=np.fft.fft2(f1)
+    H=np.fft.fft2(h1)
+    G=F*H
+    g1=np.fft.ifft2(G)
+    g1=np.real(g1)
+    g=g1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
+    return g1
+
+def correlation2(f,h):
+    height=f.shape[0]*2
+    width=f.shape[1]*2
+    f1=np.zeros((height,width))
+    h1=np.zeros((height,width))
+    f1[0:f.shape[0], 0:f.shape[1]]=f
+    h1[0:h.shape[0], 0:h.shape[1]] = h
+    F=np.fft.fft2(f1)
+    H=np.fft.fft2(h1)
+
+    F=np.conjugate(F)
+    G=F*H
+    G=np.conjugate(G)
+    g1=np.fft.ifft2(G)
+    g1=np.real(g1)
+    g = g1[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
+    return g1
+
 def convolution_rgb(f, h):
 
     f_r=f[:,:,0]
