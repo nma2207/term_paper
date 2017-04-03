@@ -4,6 +4,7 @@ import images
 import multiprocessing as mp
 from multiprocessing import Pool
 from matplotlib import  pyplot as plt
+import scipy.signal as sg
 
 def inverse_filter(g,h):
     width_g=g.shape[0]
@@ -172,20 +173,32 @@ def lucy_richardson_deconvolution_multythread(g,h,eps):
 
 def lucy_richardson_blind_deconvolution(g, n, m):
     #init h
-    h=(1./np.sum(g)**2)*conv.correlation2(g,g)
+    plt.imsave(fname='l_r_blind/g.bmp', arr=np.uint8(images.correct_image(g)), cmap='gray')
+    h1=conv.gaussian(1,3,3)
+    h=np.float64(np.zeros(g.shape))
+    h[255:258, 255:258]=h1
     f=np.copy(g)
     print 'blind l-r'
+    print '0  %'
     for i in range(n):
-        print (float(i)/n)*100, ' %'
-        #print 'h:'
-        for k in range(m):
-            #print '--', float(k)/m*100, '%'
-            p=g/(conv.convolution2(h,f))
-            h=(1./np.sum(f))*(h*conv.correlation2(f,p))
-        #print 'f:'
-        for k in range(m):
-            #print '--', float(k) / m * 100, '%'
-            p=g/(conv.convolution2(f,h))
-            f=(1./np.sum(h))*(f*conv.correlation2(p,h))
 
+        #print 'h:'
+        #print '-- 0 %'
+        for k in range(m):
+            # p = g / (conv.convolution2(f, h))
+            # h = (1. / np.sum(f)) * (h * conv.correlation2(f, p))
+            p=g/(sg.convolve2d(f,h, mode='same'))
+            h=(1./np.sum(f))*(h*sg.correlate2d(f,p,mode='same'))
+            #print '--', float(k+1) / m * 100, '%'
+        #print 'f:'
+        #print '-- 0 %'
+        for k in range(m):
+            # p = g / (conv.convolution2(f, h))
+            # f = (1. / np.sum(h)) * (f * conv.correlation2(h, p))
+            p=g/(sg.convolve2d(f,h, mode='same'))
+            f=(1./np.sum(h))*(f*sg.correlate2d(h,p,mode='same'))
+            #print '--', float(k+1) / m * 100, '%'
+        print (float(i+1) / n) * 100, ' %'
+        name='l_r_blind/new_lena'+str(i)+'.bmp'
+        plt.imsave(fname=name, arr=np.uint8(images.correct_image(f)), cmap='gray')
     return f,h
