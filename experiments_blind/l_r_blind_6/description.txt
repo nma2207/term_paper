@@ -1,0 +1,4 @@
+blurred image:gaussian sigma 13, size 15x15
+l-r-IBD n=100, m=10
+algorithm from article №33
+init h: 1/size np.sum(h)=1

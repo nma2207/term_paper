@@ -30,6 +30,7 @@ def compare_images_rgb(a,b):
 
 def correct_image(im):
     i=0
+    im=np.copy(im)
     for i in range(im.shape[0]):
         for j in range(im.shape[1]):
             if(im[i,j]<0):

@@ -161,6 +161,20 @@ def test4():
     im_g=np.sqrt(im_x**2+im_y**2)
     con_g=np.sqrt(con_x**2+con_y**2)
 
+    im_x=im_x.flatten()
+    im_y=im_y.flatten()
+    print im_x.shape
+    im_together=np.zeros((im_x.size+im_y.size))
+
+    im_together[:im_x.size]=im_x
+    im_together[im_x.size:im_x.size+im_y.size]=im_y
+
+    con_x=con_x.flatten()
+    con_y=con_y.flatten()
+    con_together=np.zeros((con_x.size+con_y.size))
+    con_together[:con_x.size]=con_x
+    con_together[con_x.size:con_x.size+con_y.size]=con_y
+
     plt.figure()
     plt.subplot(1, 2, 1)
     plt.imshow(im_g, cmap='gray')
@@ -169,34 +183,31 @@ def test4():
     plt.show()
     plt.figure(1)
     print 'go'
-    plt.subplot(1,2,1)
-    h1, bins1=np.histogram(im_x, bins=20)
-    h2, bins2 = np.histogram(con_x, bins=20)
-    plt.plot(bins1[:-1],h1, 'r', label='original')
-    plt.plot(bins2[:-1],h2, 'b', label='blurred')
+    h1, bins1=np.histogram(im_together, bins=20)
+    plt.plot(bins1[:-1], h1, 'r', label='original')
+    h2, bins2=np.histogram(con_together, bins=20)
+    plt.plot(bins2[:-1], h2, 'b', label='blurred')
     plt.legend()
-    plt.title('Sobel - x')
-    plt.subplot(1,2,2)
-    h1, bins1=np.histogram(im_y, bins=20)
-    h2, bins2 = np.histogram(con_y, bins=20)
-    plt.plot(bins1[:-1],h1, 'r')
-    plt.plot(bins2[:-1],h2, 'b')
-    plt.plot(bins1[:-1],h1, 'r', label='original')
-    plt.plot(bins2[:-1],h2, 'b', label='blurred')
-    plt.legend()
-    plt.title('Sobel - y')
     plt.show()
+    # plt.subplot(1,2,1)
+    # h1, bins1=np.histogram(im_x, bins=20)
+    # h2, bins2 = np.histogram(con_x, bins=20)
+    # plt.plot(bins1[:-1],h1, 'r', label='original')
+    # plt.plot(bins2[:-1],h2, 'b', label='blurred')
+    # plt.legend()
+    # plt.title('Sobel - x')
+    # plt.subplot(1,2,2)
+    # h1, bins1=np.histogram(im_y, bins=20)
+    # h2, bins2 = np.histogram(con_y, bins=20)
+    # plt.plot(bins1[:-1],h1, 'r')
+    # plt.plot(bins2[:-1],h2, 'b')
+    # plt.plot(bins1[:-1],h1, 'r', label='original')
+    # plt.plot(bins2[:-1],h2, 'b', label='blurred')
+    # plt.legend()
+    # plt.title('Sobel - y')
+    # plt.show()
 
-    # #n1, bins1, patches1 = plt.hist(im_g, 50, normed=1, facecolor='red', alpha=0.75)
-    # n2, bins2, patches2 = plt.hist(con_g, 50, normed=1, facecolor='blue', alpha=0.75)
-    # print bins1.shape
-    # y1 = mlab.normpdf(bins1, 0, 200)
-    # y2 = mlab.normpdf(bins2, 0, 200)
-    # plt.show()
-    # plt.figure(2)
-    # plt.plot(bins1, y1, 'r')
-    # plt.plot(bins2, y2, 'b')
-    # plt.show()
+
 def test_l_r():
     im=plt.imread('original/lena.bmp')
     #gray=images.make_gray(im)
@@ -266,9 +277,10 @@ def test_blind():
     gray=images.make_gray(im)
 
     gray=np.float64(gray)
-    h=convolves.gaussian(5,13,13)
+    h=convolves.gaussian(13,15,15)
     con=convolves.convolution2(gray, h)
-    filt,new_h=filters.lucy_richardson_blind_deconvolution(con, 1000, 1)
+    #plt.imsave(fname='l_r_blind/real_h.bmp', arr=np.uint8(images.correct_image(h)), cmap='gray')
+    filt,new_h=filters.lucy_richardson_blind_deconvolution(con, 100, 1)
     plt.imsave(fname='l_r_blind/new_lena.bmp', arr=np.uint8( images.correct_image(filt)), cmap='gray')
     plt.figure()
     plt.subplot(1,5,1)

@@ -35,6 +35,7 @@ def correlation2(f,h):
 
     F=np.conjugate(F)
     G=F*H
+    #почему
     G=np.conjugate(G)
     g1=np.fft.ifft2(G)
     g1=np.real(g1)

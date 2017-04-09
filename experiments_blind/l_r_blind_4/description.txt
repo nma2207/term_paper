@@ -1,0 +1,4 @@
+blurred image:gaussian sigma 5, size 7x7
+l-r-IBD n=1000, m=10
+algorithm from article №33
+init h: gaussian sigma 1, size 3x3

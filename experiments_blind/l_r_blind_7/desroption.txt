@@ -1,0 +1,4 @@
+blurred image:gaussian sigma 13, size 15x15
+l-r-IBD n=1000, m=100
+algorithm from article ¹33
+init h:  h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
