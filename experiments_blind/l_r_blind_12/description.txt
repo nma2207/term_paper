@@ -1,0 +1,11 @@
+h=convolves.gaussian(13,15,15)
+    #con=convolves.convolution2(gray, h)
+    con=convolves.convolution2(gray, h)
+    plt.imsave(fname='l_r_blind/real_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
+    filt,new_h=filters.lucy_richardson_blind_deconvolution(con, 500, 1)
+	
+PSF: gaussian sigma =13, size 15x15
+l-r IBD: n=500, m= 1
+INIT PSF    
+    h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
+    h/=np.sum(h)

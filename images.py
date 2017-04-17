@@ -30,14 +30,14 @@ def compare_images_rgb(a,b):
 
 def correct_image(im):
     i=0
-    im=np.copy(im)
-    for i in range(im.shape[0]):
-        for j in range(im.shape[1]):
-            if(im[i,j]<0):
-                im[i,j]=0
-            if(im[i,j]>255):
-                im[i,j]=255
-    return im
+    f_im=np.copy(im)
+    for i in range(f_im.shape[0]):
+        for j in range(f_im.shape[1]):
+            if(f_im[i,j]<0):
+                f_im[i,j]=0
+            if(f_im[i,j]>255):
+                f_im[i,j]=255
+    return f_im
 
 def correct_image_rgb(f):
     f_r=f[:,:,0]

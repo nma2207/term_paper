@@ -174,9 +174,13 @@ def lucy_richardson_deconvolution_multythread(g,h,eps):
 def lucy_richardson_blind_deconvolution(g, n, m):
     #init h
     plt.imsave(fname='l_r_blind/g.bmp', arr=np.uint8(images.correct_image(g)), cmap='gray')
-    h1=conv.gaussian(1,3,3)
-    h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
-    #plt.imsave(fname='l_r_blind/init_h.bmp', arr=np.uint8(images.correct_image(h)), cmap='gray')
+    h1=np.zeros((3,3))
+    h1[1,:3]=1/3.
+    h=np.zeros(g.shape, dtype=float)
+    h[255:258, 255:258]=h1
+    # h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
+    #h/=np.sum(h)
+    plt.imsave(fname='l_r_blind/init_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
     print 'h sum=', np.sum(h)
     #h[255:258, 255:258]=h1
     f=np.copy(g)
@@ -188,9 +192,9 @@ def lucy_richardson_blind_deconvolution(g, n, m):
         #print '-- 0 %'
         for k in range(m):
             p = g / (conv.convolution2(f, h))
-            # flr=np.fliplr(np.flipud(f))
-            # h=conv.convolution2(p,flr)*h/np.float64(np.sum(f))
-            h = (1. / np.sum(f)) * (h * conv.correlation2(f, p))
+            flr=np.fliplr(np.flipud(f))
+            h=conv.convolution2(p,flr)*h
+            #h = (1. / np.sum(f)) * (h * conv.correlation2(f, p))
             # p=g/(sg.convolve2d(f,h, mode='same'))
             # h=(1./np.sum(f))*(h*sg.correlate2d(f,p,mode='same'))
             #print '--', float(k+1) / m * 100, '%'
@@ -198,17 +202,16 @@ def lucy_richardson_blind_deconvolution(g, n, m):
         #print '-- 0 %'
         for k in range(m):
             p = g / (conv.convolution2(f, h))
-            # hlr=np.fliplr(np.flipud(h))
-            # f=conv.convolution2(p, hlr)*f/np.float64(np.sum(h))
-            f = (1. / np.sum(h)) * (f * conv.correlation2(h, p))
+            hlr=np.fliplr(np.flipud(h))
+            f=conv.convolution2(p, hlr)*f
+            #f = (1. / np.sum(h)) * (f * conv.correlation2(h, p))
             # p=g/(sg.convolve2d(f,h, mode='same'))
             # f=(1./np.sum(h))*(f*sg.correlate2d(h,p,mode='same'))
             #print '--', float(k+1) / m * 100, '%'
         print (float(i+1) / n) * 100, ' %'
         name='l_r_blind/new_lena'+str(i)+'.bmp'
         h_name='l_r_blind/h_'+str(i)+'.bmp'
-        f=np.copy(images.correct_image(f))
-        plt.imsave(fname=name, arr=np.uint8(f), cmap='gray')
+        plt.imsave(fname=name, arr=np.uint8(images.correct_image(f)), cmap='gray')
         #print 't and f comp', images.compare_images(temp, f)
-        #plt.imsave(fname=h_name, arr=np.uint8(images.correct_image(h)), cmap='gray')
+        plt.imsave(fname=h_name, arr=np.uint8(images.correct_image(h*255)), cmap='gray')
     return f,h

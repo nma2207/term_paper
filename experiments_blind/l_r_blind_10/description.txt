@@ -1,0 +1,5 @@
+blurring gaussian sigma=13, size=15x15
+размывал встроенной sg.convolved
+
+l_r IBD n=500, m=1,но не до конца, как всегда
+init h= gaussian 3x3 и сигма =1
