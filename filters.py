@@ -35,7 +35,7 @@ def inverse_filter_rgb(g,h):
 
 
 
-def wiener_filter(g, h,n, original):
+def wiener_filter(g, h,n=0, original=0):
     width_g=g.shape[0]
     height_g=g.shape[1]
     width_h=h.shape[0]
@@ -53,13 +53,15 @@ def wiener_filter(g, h,n, original):
     K=(np.abs(N)**2)/(np.abs(ORIGINAL)**2)
     G=np.fft.fft2(g1)
     H=np.fft.fft2(h1)
-    F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2)+K) )) * G
+    #F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2) ) )) * G
+    F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2)+K ))) * G
+    print K
     f=np.fft.ifft2(F)
     f=np.real(f)
     f=f[0:width_g,0:height_g]
     return f
 
-def wiener_filter_rgb(g,h,n,original):
+def wiener_filter_rgb(g,h,n=0,original=0):
     g_r=g[:,:,0]
     g_g=g[:,:,1]
     g_b=g[:,:,2]
@@ -73,6 +75,9 @@ def wiener_filter_rgb(g,h,n,original):
     result[:, :, 0] =  wiener_filter(g_r, h,n_r, original_r)
     result[:, :, 1] =  wiener_filter(g_g, h,n_g, original_g)
     result[:, :, 2] =  wiener_filter(g_b, h,n_b, original_b)
+    # result[:, :, 0] =  wiener_filter(g_r, h)
+    # result[:, :, 1] =  wiener_filter(g_g, h)
+    # result[:, :, 2] =  wiener_filter(g_b, h)
     return result
 
 def tickhonov_regularization(g,h):

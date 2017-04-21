@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 def convolution(f,h):
-    result=sc_s.convolve2d(f,h)
+    result=sc_s.convolve2d(f,h, mode='full')
     return result
 
 def convolution2(f,h):
@@ -19,8 +19,8 @@ def convolution2(f,h):
     G=F*H
     g1=np.fft.ifft2(G)
     g1=np.real(g1)
-    g=g1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
-
+    #g=g1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
+    g=g1
     return g
 
 def correlation2(f,h):
@@ -57,9 +57,9 @@ def convolution_rgb(f, h):
     f_g=f[:,:,1]
     f_b=f[:,:,2]
 
-    result0 = convolution2(f_r, h)
-    result1 = convolution2(f_g, h)
-    result2 = convolution2(f_b, h)
+    result0 = convolution(f_r, h)
+    result1 = convolution(f_g, h)
+    result2 = convolution(f_b, h)
 
     result = np.zeros((result0.shape[0], result0.shape[1],3))
     result[:, :, 0] = result0

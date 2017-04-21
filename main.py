@@ -57,19 +57,31 @@ def main():
     plt.imsave("inverse_filter/P1012538_inverse.jpg", np.uint8(filt))
 
 def test():
-    im = plb.imread("original/P1012538.JPG")
-    h=convolves.motion_blur(10,30)
+    im = plb.imread("original/lena.bmp")
+    h=convolves.gaussian(10,15,15)
     con=convolves.convolution_rgb(im, h)
+    con, noise=convolves.add_normal_noise_rgb(con, 0, 1)
+    start=time.time()
+    filt=filters.wiener_filter_rgb(con, h, noise, im)
+    end=time.time()
+    f=filt[:im.shape[0],:im.shape[1],:3]
+    #print im.shape, filt[:512,:512,:3].shape
+    print images.compare_images_rgb(im, f)
+    print end-start
     plt.figure()
-    plt.subplot(1, 3, 1)
+    plt.subplot(1, 4, 1)
     plt.imshow(im)
     plt.title('original')
-    plt.subplot(1, 3, 2)
+    plt.subplot(1, 4, 2)
     plt.imshow(np.uint8(images.correct_image_rgb(con)))
-    plt.title('Motion bluring\n len=50, ang=45')
-    plt.subplot(1, 3, 3)
+    plt.title('Motion blur\nlen=30 ang=45\n noise~N(0,1)')
+    plt.subplot(1, 4, 3)
+    plt.imshow(np.uint8(images.correct_image_rgb(filt)))
+    plt.title('Restored')
+    plt.subplot(1, 4, 4)
     plt.imshow(h, cmap='gray')
     plt.title('PSF')
+
     plt.show()
 
 def test1():
@@ -234,43 +246,6 @@ def test_l_r():
     plt.show()
 
 
-def test_corr():
-    im=plt.imread('original/lena.bmp')
-
-    gray=images.make_gray(im)
-
-    gray=np.float64(gray)
-    h=convolves.random_psf(9,9)
-    con1=convolves.convolution2(gray, h)
-    cor1=convolves.correlation2(gray, h)
-
-    con2=sg.convolve2d(gray, h, mode='same')
-    cor2=sg.correlate2d(gray, h, mode='same')
-    #con=sg.convolve2d(gray, h)
-    #cor=sg.correlate2d(gray, h)
-    print 'compare convolution: ' ,images.compare_images(con1, con2)
-    print 'compare correlation: ',images.compare_images(cor1, cor2)
-    plt.figure()
-    plt.subplot(2,4,1)
-    plt.imshow(gray, cmap='gray')
-    plt.title('Original')
-    plt.subplot(2,4,2)
-    plt.imshow(np.uint8(images.correct_image(con2)), cmap='gray')
-    plt.title(' scipy.signal\n Convoluton')
-    plt.subplot(2,4,3)
-    plt.imshow(np.uint8(images.correct_image(cor2)), cmap='gray')
-    plt.title('scipy.signal\nCorrelation')
-    plt.subplot(2,4,4)
-    plt.imshow(h, cmap='gray')
-    plt.title('PSF\nrandom 9x9')
-    plt.subplot(2,4,6)
-    plt.imshow(np.uint8(images.correct_image(con1)), cmap='gray')
-    plt.title('marat\nConvoluton')
-    plt.subplot(2,4,7)
-    plt.imshow(np.uint8(images.correct_image(cor1)), cmap='gray')
-    plt.title('marat\nCorrelation')
-    plt.show()
-
 
 def test_blind():
     im=plt.imread('original/lena.bmp')
@@ -304,7 +279,7 @@ def test_blind():
 
 
 if __name__ == "__main__":
-    test_blind()
+    test()
     # start1=time.time()
     # for i in range(1):
     #     print i," 1"
