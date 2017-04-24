@@ -19,8 +19,7 @@ def convolution2(f,h):
     G=F*H
     g1=np.fft.ifft2(G)
     g1=np.real(g1)
-    #g=g1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
-    g=g1
+    g=g1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
     return g
 
 def correlation2(f,h):

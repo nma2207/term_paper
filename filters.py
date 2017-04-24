@@ -5,7 +5,7 @@ import multiprocessing as mp
 from multiprocessing import Pool
 from matplotlib import  pyplot as plt
 import scipy.signal as sg
-
+import scipy.misc as smisc
 def inverse_filter(g,h):
     width_g=g.shape[0]
     height_g=g.shape[1]
@@ -35,24 +35,27 @@ def inverse_filter_rgb(g,h):
 
 
 
-def wiener_filter(g, h,n=0, original=0):
+def wiener_filter(g, h,K):
     width_g=g.shape[0]
     height_g=g.shape[1]
     width_h=h.shape[0]
     height_h=h.shape[1]
     g1=np.zeros((2*width_g,2*height_g))
     h1=np.zeros((2*width_g, 2*height_g))
-    n1=np.zeros((2*width_g, 2*height_g))
-    original1=np.zeros((2*width_g, 2*height_g))
+    # n1=np.zeros((2*width_g, 2*height_g))
+    # original1=np.zeros((2*width_g, 2*height_g))
     g1[0:width_g,0:height_g]=g
     h1[0:width_h, 0:height_h] = h
-    n1[0:n.shape[0],0:n.shape[1]]=n
-    original1[0:original.shape[0], 0:original.shape[1]] = original
-    N=np.fft.fft2(n1)
-    ORIGINAL=np.fft.fft2(original1)
-    K=(np.abs(N)**2)/(np.abs(ORIGINAL)**2)
+    # n1[0:n.shape[0],0:n.shape[1]]=n
+    # original1[0:original.shape[0], 0:original.shape[1]] = original
+    # N=np.fft.fft2(n1)
+    # ORIGINAL=np.fft.fft2(original1)
+
     G=np.fft.fft2(g1)
     H=np.fft.fft2(h1)
+    KK = np.ones(G.shape)*K
+    print KK.shape
+    print (np.abs(H) ** 2).shape
     #F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2) ) )) * G
     F = (np.abs(H) ** 2 / (H * ((np.abs(H) ** 2)+K ))) * G
     print K
@@ -61,26 +64,26 @@ def wiener_filter(g, h,n=0, original=0):
     f=f[0:width_g,0:height_g]
     return f
 
-def wiener_filter_rgb(g,h,n=0,original=0):
+def wiener_filter_rgb(g,h,K=0):
     g_r=g[:,:,0]
     g_g=g[:,:,1]
     g_b=g[:,:,2]
-    n_r=n[:,:,0]
-    n_g=n[:,:,1]
-    n_b=n[:,:,2]
-    original_r=original[:,:,0]
-    original_g=original[:,:,1]
-    original_b=original[:,:,2]
+    # n_r=n[:,:,0]
+    # n_g=n[:,:,1]
+    # n_b=n[:,:,2]
+    # original_r=original[:,:,0]
+    # original_g=original[:,:,1]
+    # original_b=original[:,:,2]
     result=np.zeros(g.shape)
-    result[:, :, 0] =  wiener_filter(g_r, h,n_r, original_r)
-    result[:, :, 1] =  wiener_filter(g_g, h,n_g, original_g)
-    result[:, :, 2] =  wiener_filter(g_b, h,n_b, original_b)
-    # result[:, :, 0] =  wiener_filter(g_r, h)
-    # result[:, :, 1] =  wiener_filter(g_g, h)
-    # result[:, :, 2] =  wiener_filter(g_b, h)
+    # result[:, :, 0] =  wiener_filter(g_r, h,n_r, original_r)
+    # result[:, :, 1] =  wiener_filter(g_g, h,n_g, original_g)
+    # result[:, :, 2] =  wiener_filter(g_b, h,n_b, K, original_b)
+    result[:, :, 0] =  wiener_filter(g_r, h, K)
+    result[:, :, 1] =  wiener_filter(g_g, h, K)
+    result[:, :, 2] =  wiener_filter(g_b, h, K)
     return result
 
-def tickhonov_regularization(g,h):
+def tickhonov_regularization(g,h, gamma=0):
     p=np.array([
         [0,-1,0],
         [-1, 4, -1],
@@ -97,23 +100,23 @@ def tickhonov_regularization(g,h):
     G = np.fft.fft2(g1)
     H = np.fft.fft2(h1)
     p1=np.zeros((2 * width_g, 2 * height_g))
-    p1[0:3,0:3]=p
+    p1[p1.shape[0]/2-1:p1.shape[0]/2+2,p1.shape[1]/2-1:p1.shape[1]/2+2]=p
     P=np.fft.fft2(p1)
-    gamma=0.
+    #gamma=0.
     F =(np.conjugate(H)/(np.abs(H)**2+gamma*np.abs(P)**2))*G
     f = np.fft.ifft2(F)
     f = np.real(f)
     f = f[0:width_g, 0:height_g]
     return f
 
-def tickhonov_regularization_rgb(g,h):
+def tickhonov_regularization_rgb(g,h, gamma=0):
     g_r=g[:,:,0]
     g_g=g[:,:,1]
     g_b=g[:,:,2]
     result=np.zeros(g.shape)
-    result[:, :, 0] = tickhonov_regularization(g_r, h)
-    result[:, :, 1] = tickhonov_regularization(g_g, h)
-    result[:, :, 2] = tickhonov_regularization(g_b, h)
+    result[:, :, 0] = tickhonov_regularization(g_r, h, gamma)
+    result[:, :, 1] = tickhonov_regularization(g_g, h, gamma )
+    result[:, :, 2] = tickhonov_regularization(g_b, h, gamma)
     return result
 
 
@@ -179,12 +182,12 @@ def lucy_richardson_deconvolution_multythread(g,h,eps):
 def lucy_richardson_blind_deconvolution(g, n, m):
     #init h
     plt.imsave(fname='l_r_blind/g.bmp', arr=np.uint8(images.correct_image(g)), cmap='gray')
-    h1=np.zeros((3,3))
-    h1[1,:3]=1/3.
-    h=np.zeros(g.shape, dtype=float)
-    h[255:258, 255:258]=h1
-    # h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
-    #h/=np.sum(h)
+    # h1=np.zeros((3,3))
+    # h1[1,:3]=1/3.
+    # h=np.zeros(g.shape, dtype=float)
+    # h[255:258, 255:258]=h1
+    h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
+    h/=np.sum(h)
     plt.imsave(fname='l_r_blind/init_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
     print 'h sum=', np.sum(h)
     #h[255:258, 255:258]=h1
@@ -199,6 +202,7 @@ def lucy_richardson_blind_deconvolution(g, n, m):
             p = g / (conv.convolution2(f, h))
             flr=np.fliplr(np.flipud(f))
             h=conv.convolution2(p,flr)*h
+            h/=np.sum(h)
             #h = (1. / np.sum(f)) * (h * conv.correlation2(f, p))
             # p=g/(sg.convolve2d(f,h, mode='same'))
             # h=(1./np.sum(f))*(h*sg.correlate2d(f,p,mode='same'))
@@ -209,6 +213,74 @@ def lucy_richardson_blind_deconvolution(g, n, m):
             p = g / (conv.convolution2(f, h))
             hlr=np.fliplr(np.flipud(h))
             f=conv.convolution2(p, hlr)*f
+            #f = (1. / np.sum(h)) * (f * conv.correlation2(h, p))
+            # p=g/(sg.convolve2d(f,h, mode='same'))
+            # f=(1./np.sum(h))*(f*sg.correlate2d(h,p,mode='same'))
+            #print '--', float(k+1) / m * 100, '%'
+        print (float(i+1) / n) * 100, ' %'
+        name='l_r_blind/new_lena'+str(i)+'.bmp'
+        h_name='l_r_blind/h_'+str(i)+'.bmp'
+        plt.imsave(fname=name, arr=np.uint8(images.correct_image(f)), cmap='gray')
+        #print 't and f comp', images.compare_images(temp, f)
+        plt.imsave(fname=h_name, arr=np.uint8(images.correct_image(h*255)), cmap='gray')
+    return f,h
+
+def lucy_richardson_blind_deconvolution_pir(g, n, m):
+    #init h
+    plt.imsave(fname='l_r_blind/g.bmp', arr=np.uint8(images.correct_image(g)), cmap='gray')
+    # h1=np.zeros((3,3))
+    # h1[1,:3]=1/3.
+    # h=np.zeros(g.shape, dtype=float)
+    # h[255:258, 255:258]=h1
+    # h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
+    #h/=np.sum(h)
+    #plt.imsave(fname='l_r_blind/init_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
+    #print 'h sum=', np.sum(h)
+    #h[255:258, 255:258]=h1
+    f=smisc.imresize(g, (5,5))
+    h=conv.gaussian(1,3,3)
+    print 'blind l-r'
+    print '0  %'
+    for i in range(n):
+
+        #print 'h:'
+        #print '-- 0 %'
+        for k in range(m):
+            #p = g / (conv.convolution2(f, h))
+            k=sg.convolve2d(f,h, mode='full')
+            mini_g=smisc.imresize(g, (k.shape[0], k.shape[1]))
+            p=mini_g/k
+
+            flr=np.fliplr(np.flipud(f))
+            k1=conv.convolution2(p,flr)
+            h1=np.copy(k1)
+            dx=(h1.shape[0]-h.shape[0])/2
+            dy=(h1.shape[1]-h.shape[1])/2
+            h1[dx:dx+h.shape[0], dy:dy+h.shape[1]]*=h
+            h=h1
+            #h = (1. / np.sum(f)) * (h * conv.correlation2(f, p))
+            # p=g/(sg.convolve2d(f,h, mode='same'))
+            # h=(1./np.sum(f))*(h*sg.correlate2d(f,p,mode='same'))
+            #print '--', float(k+1) / m * 100, '%'
+        #print 'f:'
+        #print '-- 0 %'
+        for k in range(m):
+            # p = g / (conv.convolution2(f, h))
+            # hlr=np.fliplr(np.flipud(h))
+            # f=conv.convolution2(p, hlr)*f
+
+
+            k=sg.convolve2d(f,h, mode='full')
+            mini_g=smisc.imresize(g, (k.shape[0], k.shape[1]))
+            p=mini_g/k
+
+            hlr=np.fliplr(np.flipud(h))
+            k1=conv.convolution2(p,hlr)
+            f1=np.copy(k1)
+            dx=(f1.shape[0]-f.shape[0])/2
+            dy=(f1.shape[1]-f.shape[1])/2
+            f1[dx:dx+f.shape[0], dy:dy+f.shape[1]]*=f
+            f=f1
             #f = (1. / np.sum(h)) * (f * conv.correlation2(h, p))
             # p=g/(sg.convolve2d(f,h, mode='same'))
             # f=(1./np.sum(h))*(f*sg.correlate2d(h,p,mode='same'))

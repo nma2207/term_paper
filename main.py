@@ -13,7 +13,7 @@ from multiprocessing import Pool
 from multiprocessing import Process
 import matplotlib.mlab as mlab
 import scipy.signal as sg
-
+import scipy.misc as smisc
 
 
 
@@ -58,31 +58,38 @@ def main():
 
 def test():
     im = plb.imread("original/lena.bmp")
+    #h=convolves.motion_blur(20,30)
     h=convolves.gaussian(10,15,15)
     con=convolves.convolution_rgb(im, h)
-    con, noise=convolves.add_normal_noise_rgb(con, 0, 1)
+    #con, noise=convolves.add_normal_noise_rgb(con, 0, 1)
     start=time.time()
-    filt=filters.wiener_filter_rgb(con, h, noise, im)
+    #filt=filters.tickhonov_regularization_rgb(con ,h,1e-2)
+    #filt=filters.wiener_filter_rgb(con, h, K=1e-02)
+    filt=filters.lucy_richardson_deconvolution_multythread(con, h ,20000)
     end=time.time()
     f=filt[:im.shape[0],:im.shape[1],:3]
     #print im.shape, filt[:512,:512,:3].shape
     print images.compare_images_rgb(im, f)
     print end-start
+    #np.set_printoptions(threshold=np.nan)
+    print con
     plt.figure()
     plt.subplot(1, 4, 1)
     plt.imshow(im)
     plt.title('original')
     plt.subplot(1, 4, 2)
     plt.imshow(np.uint8(images.correct_image_rgb(con)))
-    plt.title('Motion blur\nlen=30 ang=45\n noise~N(0,1)')
+    plt.title('Gaussian blur\nsigma=10, size=15x15\nnoise~N(0,1)')
+    #plt.title('Motion blur\nlen=20, ang=30\nnoise~N(0,1)')
     plt.subplot(1, 4, 3)
     plt.imshow(np.uint8(images.correct_image_rgb(filt)))
-    plt.title('Restored')
+    #plt.title('Tikhonov regulerization\ngamma=1e-02')
+    plt.title('Lucy-Richardson deconvolution\neps=20000')
     plt.subplot(1, 4, 4)
     plt.imshow(h, cmap='gray')
     plt.title('PSF')
-
     plt.show()
+
 
 def test1():
     im = plb.imread("original/DSC02125.JPG")
@@ -253,9 +260,9 @@ def test_blind():
 
     gray=np.float64(gray)
     #h=convolves.gaussian(13,15,15)
-    h=convolves.motion_blur(10,35)
+    h=convolves.gaussian(15,13,13)
     #con=convolves.convolution2(gray, h)
-    con=convolves.convolution2(gray, h)
+    con=convolves.convolution(gray, h)
     plt.imsave(fname='l_r_blind/real_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
     filt,new_h=filters.lucy_richardson_blind_deconvolution(con, 500, 1)
     plt.imsave(fname='l_r_blind/new_lena.bmp', arr=np.uint8( images.correct_image(filt)), cmap='gray')
@@ -276,10 +283,18 @@ def test_blind():
     plt.imshow(new_h, cmap='gray')
     plt.title('new PSF')
     plt.show()
-
+def test_zoom():
+    im=plt.imread('original/lena.bmp')
+    new_im=smisc.imresize(im, (50, 64))
+    plt.figure()
+    plt.subplot(1,2,1)
+    plt.imshow(im)
+    plt.subplot(1,2,2)
+    plt.imshow(new_im)
+    plt.show()
 
 if __name__ == "__main__":
-    test()
+    test_blind()
     # start1=time.time()
     # for i in range(1):
     #     print i," 1"
