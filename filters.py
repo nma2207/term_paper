@@ -181,12 +181,18 @@ def lucy_richardson_deconvolution_multythread(g,h,eps):
 
 def lucy_richardson_blind_deconvolution(g, n, m, original):
     #init h
+    print 'First error',images.compare_images(g, original)
     plt.imsave(fname='l_r_blind/g.bmp', arr=np.uint8(images.correct_image(g)), cmap='gray')
-    # h1=np.zeros((3,3))
+    #h1=conv.random_psf(3,3)
     # h1[1,:3]=1/3.
-    # h=np.zeros(g.shape, dtype=float)
-    # h[255:258, 255:258]=h1
+    ##h=np.zeros(g.shape, dtype=float)
+    #h[255:258, 255:258]=h1
     h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
+    h/=np.sum(h)
+    #h=conv.random_psf(g.shape[0], g.shape[1])
+    #h/=np.sum(h)
+    #h = conv.correlation2(g, g)
+   # print np.sum(h)
     #h/=np.sum(h)
     plt.imsave(fname='l_r_blind/init_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
     print 'h sum=', np.sum(h)
@@ -197,34 +203,41 @@ def lucy_richardson_blind_deconvolution(g, n, m, original):
     errors=[]
     for i in range(n):
         f_prev=np.copy(f)
+
         #print 'h:'
         #print '-- 0 %'
         for k in range(m):
             p = g / (conv.convolution2(f, h))
             flr=np.fliplr(np.flipud(f))
             h=conv.convolution2(p,flr)*h
+            h/=np.sum(f)
             #h/=np.sum(h)
             #h = (1. / np.sum(f)) * (h * conv.correlation2(f, p))
             # p=g/(sg.convolve2d(f,h, mode='same'))
             # h=(1./np.sum(f))*(h*sg.correlate2d(f,p,mode='same'))
             #print '--', float(k+1) / m * 100, '%'
-        #print 'f:'
-        #print '-- 0 %'
-        for k in range(m):
-            p = g / (conv.convolution2(f, h))
-            hlr=np.fliplr(np.flipud(h))
-            f=conv.convolution2(p, hlr)*f
-            #f = (1. / np.sum(h)) * (f * conv.correlation2(h, p))
-            # p=g/(sg.convolve2d(f,h, mode='same'))
+
             # f=(1./np.sum(h))*(f*sg.correlate2d(h,p,mode='same'))
-            #print '--', float(k+1) / m * 100, '%'
+            # print 'f:'
+            # print '-- 0 %'
+            h /= np.sum(h)
+            for k in range(m):
+                p = g / (conv.convolution2(f, h))
+                hlr = np.fliplr(np.flipud(h))
+                f = conv.convolution2(p, hlr) * f
+                f/=np.sum(h)
+                # f = (1. / np.sum(h)) * (f * conv.correlation2(h, p))
+                # p=g/(sg.convolve2d(f,h, mode='same'))
+                # print '--', float(k+1) / m * 100, '%'
+            #images.check_image(f)
         print (float(i+1) / n) * 100, ' %'
         name='l_r_blind/new_lena'+str(i)+'.bmp'
         h_name='l_r_blind/h_'+str(i)+'.bmp'
         plt.imsave(fname=name, arr=np.uint8(images.correct_image(f)), cmap='gray')
         #print 't and f comp', images.compare_images(temp, f)
         plt.imsave(fname=h_name, arr=np.uint8(images.correct_image(h*255)), cmap='gray')
-        error = images.compare_images(f, original)
+        images.check_image(images.correct_image(f))
+        error = images.compare_images(images.correct_image(f), original)
         errors.append(error)
         print 'err =',error
     errors=np.array(errors)

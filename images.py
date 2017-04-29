@@ -52,4 +52,8 @@ def correct_image_rgb(f):
     result[:, :, 2] = res_b
     return result
 
-
+def check_image(f):
+    for i in range(f.shape[0]):
+        for j in range(f.shape[1]):
+            if f[i,j]<0 or f[i,j]>255:
+                print 'All is bad:',i,j,f[i,j]
