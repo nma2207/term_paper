@@ -179,7 +179,7 @@ def lucy_richardson_deconvolution_multythread(g,h,eps):
     result[:, :, 2]=temp_result[2]
     return result
 
-def lucy_richardson_blind_deconvolution(g, n, m):
+def lucy_richardson_blind_deconvolution(g, n, m, original):
     #init h
     plt.imsave(fname='l_r_blind/g.bmp', arr=np.uint8(images.correct_image(g)), cmap='gray')
     # h1=np.zeros((3,3))
@@ -187,22 +187,23 @@ def lucy_richardson_blind_deconvolution(g, n, m):
     # h=np.zeros(g.shape, dtype=float)
     # h[255:258, 255:258]=h1
     h = (1. / np.sum(g) ** 2) * conv.correlation2(g, g)
-    h/=np.sum(h)
+    #h/=np.sum(h)
     plt.imsave(fname='l_r_blind/init_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
     print 'h sum=', np.sum(h)
     #h[255:258, 255:258]=h1
     f=np.copy(g)
     print 'blind l-r'
     print '0  %'
+    errors=[]
     for i in range(n):
-
+        f_prev=np.copy(f)
         #print 'h:'
         #print '-- 0 %'
         for k in range(m):
             p = g / (conv.convolution2(f, h))
             flr=np.fliplr(np.flipud(f))
             h=conv.convolution2(p,flr)*h
-            h/=np.sum(h)
+            #h/=np.sum(h)
             #h = (1. / np.sum(f)) * (h * conv.correlation2(f, p))
             # p=g/(sg.convolve2d(f,h, mode='same'))
             # h=(1./np.sum(f))*(h*sg.correlate2d(f,p,mode='same'))
@@ -223,6 +224,15 @@ def lucy_richardson_blind_deconvolution(g, n, m):
         plt.imsave(fname=name, arr=np.uint8(images.correct_image(f)), cmap='gray')
         #print 't and f comp', images.compare_images(temp, f)
         plt.imsave(fname=h_name, arr=np.uint8(images.correct_image(h*255)), cmap='gray')
+        error = images.compare_images(f, original)
+        errors.append(error)
+        print 'err =',error
+    errors=np.array(errors)
+    plt.figure()
+    plt.plot(np.arange(errors.size), errors)
+    plt.xlabel('Steps')
+    plt.ylabel('Dif btw original and f_k')
+    plt.show()
     return f,h
 
 def lucy_richardson_blind_deconvolution_pir(g, n, m):
