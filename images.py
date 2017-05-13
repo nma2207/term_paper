@@ -52,6 +52,18 @@ def correct_image_rgb(f):
     result[:, :, 2] = res_b
     return result
 
+def make0to1(im):
+    if(np.max(im)>1):
+        return im/255.
+    else:
+        return im
+
+def make0to255(im):
+    if(np.max(im)<=1):
+        return im*255
+    else:
+        return im
+
 def check_image(f):
     for i in range(f.shape[0]):
         for j in range(f.shape[1]):

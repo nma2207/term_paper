@@ -260,11 +260,13 @@ def test_blind():
 
     gray=np.float64(gray)
     #h=convolves.gaussian(13,15,15)
-    h=convolves.gaussian(15,13,13)
+    h=convolves.motion_blur(20,30)
     #con=convolves.convolution2(gray, h)
     con=convolves.convolution2(gray, h)
     plt.imsave(fname='l_r_blind/real_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
-    filt,new_h=filters.lucy_richardson_blind_deconvolution(con, 50, 1, gray)
+    filt,new_h=filters.lucy_richardson_blind_deconvolution0_1(images.make0to1(con),
+                                                              50, 1,
+                                                              images.make0to1(gray))
     plt.imsave(fname='l_r_blind/new_lena.bmp', arr=np.uint8( images.correct_image(filt)), cmap='gray')
     plt.figure()
     plt.subplot(1,5,1)
@@ -293,8 +295,41 @@ def test_zoom():
     plt.imshow(new_im)
     plt.show()
 
+def test_pir():
+    im=plt.imread('original/lena.bmp')
+    gray=images.make_gray(im)
+
+    gray=np.float64(gray)
+    #h=convolves.gaussian(13,15,15)
+    h=convolves.motion_blur(20,30)
+    #print 'real_h =',h
+    #con=convolves.convolution2(gray, h)
+    con=convolves.convolution2(gray, h)
+    plt.imsave(fname='l_r_blind/real_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
+    filt,new_h=filters.lucy_richardson_blind_deconvolution_pir(con, 5, 1, 151, 'horizontal')
+    #filt=images.correct_image(filt*255)
+    plt.imsave(fname='l_r_blind/new_lena.bmp', arr=np.uint8( images.correct_image(filt)), cmap='gray')
+    plt.figure()
+    plt.subplot(1,5,1)
+    plt.imshow(gray, cmap='gray')
+    plt.title('Original')
+    plt.subplot(1,5,2)
+    plt.imshow(np.uint8(images.correct_image(con)), cmap='gray')
+    plt.title('Convoluton')
+    plt.subplot(1,5,3)
+    plt.imshow(np.uint8( images.correct_image(filt)), cmap='gray')
+    plt.title('L-R blind\nn=20, m=10')
+    plt.subplot(1,5,4)
+    plt.imshow(h, cmap='gray')
+    plt.title('PSF\nmotion blur\nlen=20 ang=30')
+    plt.subplot(1,5,5)
+    plt.imshow(new_h, cmap='gray')
+    plt.title('new PSF')
+    print images.compare_images(gray, con)
+    print images.compare_images(gray, filt)
+    plt.show()
 if __name__ == "__main__":
-    test_blind()
+    test_pir()
     # start1=time.time()
     # for i in range(1):
     #     print i," 1"
