@@ -2,7 +2,7 @@
 from scipy import signal as sc_s
 import numpy as np
 import math
-
+import gc
 def convolution(f,h):
     result=sc_s.convolve2d(f,h, mode='full')
     return result
@@ -17,9 +17,15 @@ def convolution2(f,h):
     F=np.fft.fft2(f1)
     H=np.fft.fft2(h1)
     G=F*H
+    del H
+
+    del F
     g1=np.fft.ifft2(G)
+    del G
     g1=np.real(g1)
     g=g1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
+    del g1
+    gc.collect()
     return g
 
 def correlation2(f,h):

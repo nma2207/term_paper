@@ -26,7 +26,7 @@ def main():
     h = convolves.motion_blur(10,30)
     #Convolve images
     con=convolves.convolution_rgb(im,h)
-    noise=convolves.add_normal_noise_rgb(con, 0, 30)
+    #noise=convolves.add_normal_noise_rgb(con, 0, 30)
 
     #Deblurring
     #filt = filters.inverse_filter_rgb(con, h)
@@ -57,7 +57,7 @@ def main():
     plt.imsave("inverse_filter/P1012538_inverse.jpg", np.uint8(filt))
 
 def test():
-    im = plb.imread("original/lena.bmp")
+    im = plb.imread("original/rimma.jpg")
     #h=convolves.motion_blur(20,30)
     h=convolves.gaussian(10,15,15)
     con=convolves.convolution_rgb(im, h)
@@ -65,9 +65,14 @@ def test():
     start=time.time()
     #filt=filters.tickhonov_regularization_rgb(con ,h,1e-2)
     #filt=filters.wiener_filter_rgb(con, h, K=1e-02)
-    filt=filters.lucy_richardson_deconvolution_multythread(con, h ,20000)
+    print 'go'
+    filt = filters.lucy_richardson_deconvolution_multythread(con ,h, 20000)
+    #filt = filters.tickhonov_regularization_rgb(con, h, 1e-2)
+    #filt=filters.wiener_filter_rgb(con, h, K=1e-3)
+    print 'end'
     end=time.time()
-    f=filt[:im.shape[0],:im.shape[1],:3]
+    f=filt[h.shape[0]//2:im.shape[0]+h.shape[0]//2,
+            h.shape[1]//2:im.shape[1]+h.shape[1]//2,:3]
     #print im.shape, filt[:512,:512,:3].shape
     print images.compare_images_rgb(im, f)
     print end-start
@@ -83,8 +88,8 @@ def test():
     #plt.title('Motion blur\nlen=20, ang=30\nnoise~N(0,1)')
     plt.subplot(1, 4, 3)
     plt.imshow(np.uint8(images.correct_image_rgb(filt)))
-    #plt.title('Tikhonov regulerization\ngamma=1e-02')
-    plt.title('Lucy-Richardson deconvolution\neps=20000')
+    #plt.title('Weiner filter\nK=1e-3')
+    plt.title('Tikhonov regulerization\ngamma=1e-2')
     plt.subplot(1, 4, 4)
     plt.imshow(h, cmap='gray')
     plt.title('PSF')
@@ -100,7 +105,7 @@ def test1():
     con=images.correct_image_rgb(con)
     print 'go multy-thread'
     start1 = time.time()
-    filt1=filters.lucy_richardson_deconvolution_multythread(con, h,5000)
+    filt1=filters.lucy_richardson_deconvolution_multythread(con, h,20000)
     end1=time.time()
     print 'go posled'
     start2=time.time()
@@ -237,7 +242,7 @@ def test_l_r():
     con=convolves.convolution_rgb(im, h)
     con,noise=convolves.add_normal_noise_rgb(con, 0, 5)
     print 'go filt'
-    filt=filters.lucy_richardson_deconvolution_multythread(con,h, 20000)
+    filt=filters.lucy_richardson_deconvolution_multythread(con,h, 5000)
     con=np.uint8(images.correct_image_rgb(con))
     #con=convolves.add_normal_noise_rgb()
     filt=np.uint8(images.correct_image_rgb(filt))
@@ -300,13 +305,13 @@ def test_pir():
     gray=images.make_gray(im)
 
     gray=np.float64(gray)
-    #h=convolves.gaussian(13,15,15)
-    h=convolves.motion_blur(20,30)
+    h=convolves.gaussian(13,15,15)
+    #h=convolves.motion_blur(20,30)
     #print 'real_h =',h
     #con=convolves.convolution2(gray, h)
-    con=convolves.convolution2(gray, h)
+    con=convolves.convolution(gray, h)
     plt.imsave(fname='l_r_blind/real_h.bmp', arr=np.uint8(images.correct_image(h*255)), cmap='gray')
-    filt,new_h=filters.lucy_richardson_blind_deconvolution_pir(con, 5, 1, 151, 'horizontal')
+    filt,new_h=filters.lucy_richardson_blind_deconvolution_pir(con, 5, 1,1, 501, 'gaussian', original=gray)
     #filt=images.correct_image(filt*255)
     plt.imsave(fname='l_r_blind/new_lena.bmp', arr=np.uint8( images.correct_image(filt)), cmap='gray')
     plt.figure()
@@ -325,11 +330,49 @@ def test_pir():
     plt.subplot(1,5,5)
     plt.imshow(new_h, cmap='gray')
     plt.title('new PSF')
-    print images.compare_images(gray, con)
-    print images.compare_images(gray, filt)
+    #print images.compare_images(gray, con[:g])
+    #print images.compare_images(gray, filt)
     plt.show()
+
+def test_l_r_graph():
+    im = plb.imread("original/my_bike.jpg")
+    #h=convolves.motion_blur(20,30)
+    gray=images.make_gray(im)
+    h=convolves.gaussian(10,15,15)
+    con=convolves.convolution(gray, h)
+    con, noise=convolves.add_normal_noise(con, 0, 1)
+    start=time.time()
+    print 'go'
+    filt=filters.lucy_richardson_deconvolution(con, h ,eps=0, original= gray, N=82)
+    print 'end'
+    end=time.time()
+    f=filt
+    #print im.shape, filt[:512,:512,:3].shape
+    #print images.compare_images_rgb(im, f)
+    print end-start
+    #np.set_printoptions(threshold=np.nan)
+    print con
+    plt.figure()
+    plt.subplot(1, 4, 1)
+    plt.imshow(gray, cmap='gray')
+    plt.title('original')
+    plt.subplot(1, 4, 2)
+    plt.imshow(np.uint8(images.correct_image(con)), cmap='gray')
+    plt.title('Gaussian blur\nsigma=10, size=15x15\nnoise~N(0,1)')
+    #plt.title('Motion blur\nlen=20, ang=30\nnoise~N(0,1)')
+    plt.subplot(1, 4, 3)
+    plt.imshow(np.uint8(images.correct_image(filt)),cmap='gray')
+    #plt.title('Tikhonov regulerization\ngamma=1e-02')
+    plt.title('Lucy-Richardson deconvolution\neps=5000')
+    plt.subplot(1, 4, 4)
+    plt.imshow(h, cmap='gray')
+    plt.title('PSF')
+    plt.show()
+
+
+
 if __name__ == "__main__":
-    test_pir()
+    test()
     # start1=time.time()
     # for i in range(1):
     #     print i," 1"

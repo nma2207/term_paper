@@ -7,7 +7,7 @@ from matplotlib import  pyplot as plt
 import scipy.signal as sg
 import scipy.misc as smisc
 import math
-
+import gc
 def inverse_filter(g,h):
     width_g=g.shape[0]
     height_g=g.shape[1]
@@ -127,26 +127,54 @@ def quick_blind_deconvolution(g):
     print 'TODO!!'
 
 
-def lucy_richardson_devonvolution(g,h,eps): #n - iterations count
+def lucy_richardson_deconvolution(g,h,eps):
+    #n - iterations count
     f=np.copy(g)
     f_prev=np.zeros(f.shape, dtype=float)
     k=images.compare_images(f_prev, f)
+    err=[]
+    i=0
     while(True):
 
         f_prev=np.copy(f)
-        print k
+
         k1=conv.convolution2(f,h)
         #k1=k1[h.shape[0]//2:f.shape[0]+h.shape[0]//2, h.shape[1]//2:f.shape[1]+h.shape[1]//2]
         k2=g/k1
         h1=np.flipud(np.fliplr(h))
+        del k1
+
         k3=conv.convolution2(k2,h1)
+        del k2
+        del h1
+
         #k3 = k3[h.shape[0] // 2:f.shape[0] + h.shape[0] // 2, h.shape[1] // 2:f.shape[1] + h.shape[1] // 2]
         f=f*k3
         k_prev=k
         k=images.compare_images(f_prev, f)
-        if(k<eps or k_prev<k):
+        # err.append(images.compare_images(f[h.shape[0]//2:original.shape[0]+h.shape[0]//2,
+        #                                  h.shape[1]//2:original.shape[1] + h.shape[1]//2],
+        #            original))
+        if(eps!=0 and (k<eps or k_prev<k)):
+            print 'eps break'
             break
+        # if(N!=0 and not(i<N)):
+        #     print 'N break'
+        #     break
+        # if N!=0:
+        #     print i
+        # if eps!=0:
+        #     print k
+        i+=1
+        gc.collect()
         #print k
+    # err=np.array(err)
+    # plt.figure()
+    # plt.plot(np.arange(err.size), err)
+    # plt.xlabel('iteration')
+    # plt.ylabel('dif')
+    # plt.title('compare f(i) and original image')
+    # plt.show()
     return f
 
 def lucy_richardson_deconvolution_rgb(g, h, eps):
@@ -157,15 +185,15 @@ def lucy_richardson_deconvolution_rgb(g, h, eps):
     print 'lucy-richardson deconvolution'
 
     print 'red'
-    result[:, :, 0] = lucy_richardson_devonvolution(g_r, h,eps)
+    result[:, :, 0] = lucy_richardson_deconvolution(g_r, h,eps)
     print 'green'
-    result[:, :, 1] = lucy_richardson_devonvolution(g_g, h,eps)
+    result[:, :, 1] = lucy_richardson_deconvolution(g_g, h,eps)
     print 'blue'
-    result[:, :, 2] = lucy_richardson_devonvolution(g_b, h,eps)
+    result[:, :, 2] = lucy_richardson_deconvolution(g_b, h,eps)
     return result
 
 def temp(t):
-    return lucy_richardson_devonvolution(*t)
+    return lucy_richardson_deconvolution(*t)
 
 
 
@@ -177,7 +205,10 @@ def lucy_richardson_deconvolution_multythread(g,h,eps):
     values=[(g_r, h, eps),
             (g_g, h, eps),
             (g_b, h, eps)]
+    print 'go multythread'
     temp_result=pool.map(temp, values)
+    print 'end multythread'
+    gc.collect()
     result = np.zeros(g.shape)
     result[:, :, 0]=temp_result[0]
     result[:, :, 1]=temp_result[1]
@@ -322,7 +353,7 @@ def lucy_richardson_blind_deconvolution0_1(g, n, m, original):
     plt.show()
     return f,h
 
-def lucy_richardson_blind_deconvolution_pir(g, n, m, max_psf_size=0, init_h_mode='gaussian'):
+def lucy_richardson_blind_deconvolution_pir(g, n, m,d, max_psf_size=0, init_h_mode='gaussian', original=None):
     # g - blurred image
     # m, n - count of interation in RL-method
     # max_psf_size - How long must be PSF
@@ -353,36 +384,54 @@ def lucy_richardson_blind_deconvolution_pir(g, n, m, max_psf_size=0, init_h_mode
         h = (1. / np.sum(mini_g) ** 2) * conv.correlation2(mini_g, mini_g)
         h /= np.sum(h)
     else:
-        h = np.ones((3,3))/9.
+        h = conv.random_psf(3,3)
     print h
     s=3
+    err=[]
     while (s<=max_psf_size):
         print 'size =',s
         mini_g=smisc.imresize(g, (s,s))
+        f = lucy_richardson_deconvolution(mini_g, h, 20000)
         if (s!=3):
             h=smisc.imresize(h, (s,s))
-        f = lucy_richardson_devonvolution(mini_g, h, 30e+4)
-        for i in range(n):
-            #f_prev = np.copy(f)
+        for k in range (d):
+            if(k!=0):
+                f = lucy_richardson_deconvolution(mini_g, h, 20000)
+            for i in range(n):
+                #f_prev = np.copy(f)
 
-            #Correct h
-            h_prev=np.copy(h)
-            for k in range(m):
-                p = mini_g / (conv.convolution2(f, h))
-                flr = np.fliplr(np.flipud(f))
-                h = conv.convolution2(p, flr)*h
-                #h /= np.sum(h)
-                #print 'h =',h
+                #Correct h
+                h_prev=np.copy(h)
+                for k in range(m):
+                    p = mini_g / (conv.convolution2(f, h))
+                    flr = np.fliplr(np.flipud(f))
+                    h = conv.convolution2(p, flr)*h
+                    #h /= np.sum(h)
+                    #print 'h =',h
 
-            for k in range(m):
-                p = mini_g / (conv.convolution2(h_prev, f))
-                hlr = np.fliplr(np.flipud(h_prev))
-                f = conv.convolution2(p, hlr) * f
-            print (float(i + 1) / n) * 100, ' %'
-            name = 'l_r_blind/new_lena' +str(s)+'_'+ str(i) + '.bmp'
-            h_name = 'l_r_blind/h_'+str(s)+'_' + str(i) + '.bmp'
-            plt.imsave(fname=name, arr=np.uint8(images.correct_image(f)), cmap='gray')
-            plt.imsave(fname=h_name, arr=np.uint8(images.correct_image(h*255)), cmap='gray')
+                for k in range(m):
+                    p = mini_g / (conv.convolution2(h_prev, f))
+                    hlr = np.fliplr(np.flipud(h_prev))
+                    f = conv.convolution2(p, hlr) * f
+                print (float(i + 1) / n) * 100, ' %'
+                name = 'l_r_blind/new_lena' +str(s)+'_'+ str(i) + '.bmp'
+                h_name = 'l_r_blind/h_'+str(s)+'_' + str(i) + '.bmp'
+                plt.imsave(fname=name, arr=np.uint8(images.correct_image(f)), cmap='gray')
+                plt.imsave(fname=h_name, arr=np.uint8(images.correct_image(h*255)), cmap='gray')
         s=int(s*math.sqrt(2))
-    f = lucy_richardson_devonvolution(g, h, 20000)
+        #
+        if(original!=None):
+            good_f = lucy_richardson_deconvolution(g, h, 20000)
+            print good_f.shape
+            dx = (good_f.shape[0]-original.shape[0])//2
+            dy = (good_f.shape[1]-original.shape[1])//2
+            err.append(images.compare_images(good_f[dx:original.shape[0]+dx,
+                                                    dy:original.shape[1] + dy],
+                                             original))
+    err=np.array(err)
+    plt.figure()
+    plt.plot(np.arange(err.size), err)
+    #plt.imshow(h,cmap='gray')
+    plt.show()
+    f = lucy_richardson_deconvolution(g, h, 5000)
     return f, h
