@@ -57,20 +57,27 @@ def main():
     plt.imsave("inverse_filter/P1012538_inverse.jpg", np.uint8(filt))
 
 def test():
-    im = plb.imread("original/rimma.jpg")
-    #h=convolves.motion_blur(20,30)
-    h=convolves.gaussian(10,15,15)
+    im = plb.imread("original/adelina.jpg")
+    h=convolves.motion_blur(40,30)
+   # h=convolves.gaussian(10,15,15)
     con=convolves.convolution_rgb(im, h)
-    #con, noise=convolves.add_normal_noise_rgb(con, 0, 1)
+    # plt.figure()
+    # c=np.copy(con)
+    # plt.imshow(np.uint8(images.correct_image_rgb(c)))
+    # plt.show()
+    con, noise=convolves.add_normal_noise_rgb(con, 0, 1)
     start=time.time()
     #filt=filters.tickhonov_regularization_rgb(con ,h,1e-2)
-    #filt=filters.wiener_filter_rgb(con, h, K=1e-02)
+    #filt=filters.wiener_filter_rgb(con, h, K=1e-03)
     print 'go'
-    filt = filters.lucy_richardson_deconvolution_multythread(con ,h, 20000)
-    #filt = filters.tickhonov_regularization_rgb(con, h, 1e-2)
-    #filt=filters.wiener_filter_rgb(con, h, K=1e-3)
+    #filt=filters.inverse_filter_rgb(con, h)
+    #filt = filters.lucy_richardson_deconvolution_multythread(con ,h, 20000)
+    filt = filters.tickhonov_regularization_rgb(con, h, 1e-3)
+    #filt=filters.wiener_filter_rgb(con, h, K=1)
     print 'end'
     end=time.time()
+    # f=filt[:im.shape[0],
+    #         :im.shape[1],:3]
     f=filt[h.shape[0]//2:im.shape[0]+h.shape[0]//2,
             h.shape[1]//2:im.shape[1]+h.shape[1]//2,:3]
     #print im.shape, filt[:512,:512,:3].shape
@@ -84,17 +91,21 @@ def test():
     plt.title('original')
     plt.subplot(1, 4, 2)
     plt.imshow(np.uint8(images.correct_image_rgb(con)))
-    plt.title('Gaussian blur\nsigma=10, size=15x15\nnoise~N(0,1)')
-    #plt.title('Motion blur\nlen=20, ang=30\nnoise~N(0,1)')
+    #plt.title('Gaussian blur\nsigma=10, size=15x15\nnoise~N(0,1)')
+    plt.title('Motion blur\nlen=40, ang=30\nnoise~N(0,1)')
     plt.subplot(1, 4, 3)
     plt.imshow(np.uint8(images.correct_image_rgb(filt)))
-    #plt.title('Weiner filter\nK=1e-3')
-    plt.title('Tikhonov regulerization\ngamma=1e-2')
+    plt.title('Weiner filter\nK = 1e-3')
+    #plt.title('Tikhonov regulerization\ngamma = 1e-2')
+    #plt.title('Inverse filter')
+    #plt.title('Lucy-Richardson deconvolution\neps = 20000')
     plt.subplot(1, 4, 4)
     plt.imshow(h, cmap='gray')
     plt.title('PSF')
     plt.show()
-
+    plt.figure()
+    plt.imshow(np.uint8(images.correct_image_rgb(filt)))
+    plt.show()
 
 def test1():
     im = plb.imread("original/DSC02125.JPG")
@@ -340,7 +351,7 @@ def test_l_r_graph():
     gray=images.make_gray(im)
     h=convolves.gaussian(10,15,15)
     con=convolves.convolution(gray, h)
-    con, noise=convolves.add_normal_noise(con, 0, 1)
+    #con, noise=convolves.add_normal_noise(con, 0, 1)
     start=time.time()
     print 'go'
     filt=filters.lucy_richardson_deconvolution(con, h ,eps=0, original= gray, N=82)

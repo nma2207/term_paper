@@ -127,7 +127,7 @@ def quick_blind_deconvolution(g):
     print 'TODO!!'
 
 
-def lucy_richardson_deconvolution(g,h,eps):
+def lucy_richardson_deconvolution(g,h,eps =0, original=None, N=0):
     #n - iterations count
     f=np.copy(g)
     f_prev=np.zeros(f.shape, dtype=float)
@@ -152,29 +152,29 @@ def lucy_richardson_deconvolution(g,h,eps):
         f=f*k3
         k_prev=k
         k=images.compare_images(f_prev, f)
-        # err.append(images.compare_images(f[h.shape[0]//2:original.shape[0]+h.shape[0]//2,
-        #                                  h.shape[1]//2:original.shape[1] + h.shape[1]//2],
-        #            original))
+        err.append(images.compare_images(f[h.shape[0]//2:original.shape[0]+h.shape[0]//2,
+                                         h.shape[1]//2:original.shape[1] + h.shape[1]//2],
+                   original))
         if(eps!=0 and (k<eps or k_prev<k)):
             print 'eps break'
             break
-        # if(N!=0 and not(i<N)):
-        #     print 'N break'
-        #     break
-        # if N!=0:
-        #     print i
-        # if eps!=0:
-        #     print k
+        if(N!=0 and not(i<N)):
+            print 'N break'
+            break
+        if N!=0:
+            print i
+        if eps!=0:
+            print k
         i+=1
         gc.collect()
         #print k
-    # err=np.array(err)
-    # plt.figure()
-    # plt.plot(np.arange(err.size), err)
-    # plt.xlabel('iteration')
-    # plt.ylabel('dif')
-    # plt.title('compare f(i) and original image')
-    # plt.show()
+    err=np.array(err)
+    plt.figure()
+    plt.plot(np.arange(err.size), err)
+    plt.xlabel('iteration')
+    plt.ylabel('dif')
+    plt.title('compare f(i) and original image')
+    plt.show()
     return f
 
 def lucy_richardson_deconvolution_rgb(g, h, eps):
